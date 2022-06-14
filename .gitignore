@@ -1,6 +1,7 @@
 Bin/
 obj/
+migrations/
 .vs/
 .config/
-WebApp.csproj.user
 appsettings.Development.json
+WebApp.csproj.user
