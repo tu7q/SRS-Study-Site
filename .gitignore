@@ -1,6 +1,6 @@
 Bin/
+obj/
 .vs/
 .config/
 WebApp.csproj.user
 appsettings.Development.json
-
