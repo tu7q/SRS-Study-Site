@@ -1,0 +1,2 @@
+def RequireMSAuthentication(f):
+    pass
