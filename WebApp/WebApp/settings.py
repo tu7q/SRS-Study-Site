@@ -27,24 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# settings for microsoft stuff.
-MICROSOFT_APP = {
-    'app_id': 'APP_ID_HERE',
-    'app_secret': '',
-    'redirect': '',
-    'scopes': [],
-    'authority': '',
-    'valid_email_domains': '',
-    'logout_uri': ''
-}
-
-# redirect
 LOGIN_REDIRECT_URL = ''
 
 # Application definition
 
 INSTALLED_APPS = [
-    'MicrosoftAuthentication',
+    #'MicrosoftAuthentication',
     'SRS.apps.SrsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
