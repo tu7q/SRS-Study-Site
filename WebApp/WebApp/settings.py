@@ -32,7 +32,7 @@ LOGIN_REDIRECT_URL = ''
 # Application definition
 
 INSTALLED_APPS = [
-    #'MicrosoftAuthentication',
+    'MicrosoftAuthentication',
     'SRS.apps.SrsConfig',
     'django.contrib.admin',
     'django.contrib.auth',

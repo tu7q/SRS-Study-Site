@@ -1,10 +1,11 @@
 from django.contrib.sessions.backends.base import SessionBase
 from typing import Any, Dict, Optional
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 from . import settings as s 
 import requests
 import msal
-
+from django.urls import reverse
 
 def load_cache(session: SessionBase) -> msal.SerializableTokenCache:
     cache = msal.SerializableTokenCache()
@@ -42,7 +43,7 @@ def get_sign_in_flow() -> Dict[str, Any]: # I think thats the return type
         #redirect_url=s.REDIRECT
     )
 
-def get_token_from_code(request: HttpRequest) -> Optional[str]: # close enough
+def get_token_from_code(request: HttpRequest) -> Dict[str, Any]: # close enough
     cache = load_cache(request.session)
     auth_app = get_msal_app(cache)
     flow = request.session.pop('auth_flow', {})
@@ -54,31 +55,33 @@ def get_token_from_code(request: HttpRequest) -> Optional[str]: # close enough
         if 'error' in result:
             print(result)
             print("\nERROR IN RESULTs\n")
-            return None # something went wrong
+            return {} # something went wrong
     except ValueError: # usually caused by CSRF
         print("\nVALUE ERORr\n")
-        return None
+        return {}
     save_cache(request.session, cache)
     #print('token result: ', result)
-    return result.get('access_token', None)
+    return result
 
-def get_user(token: str) -> Dict[str, str]: # Should be accurate enough 
+def get_user(token: Dict[str, Any]) -> Dict[str, str]: # Should be accurate enough 
+    access_token = token.get("access_token", '')
     r = requests.get(
         url=f'{s.GRAPH_URL}/me',
-        headers={f'Authorization': 'Bearer {token}'}
+        headers={"Authorization": f'Bearer {access_token}'}
     )
-    print('status code: ', r.status_code)
     if r.status_code == requests.status_codes.codes.ok:
         return r.json()
     return {} # empty lmao
 
 def store_user(session: SessionBase, user: Dict[str, str]) -> None: # close enough
-    print('user: ', user)
     session['user'] = {
         'is_authenticated': True,
         'name': user.get('displayName', ''),
         'email': user.get('mail', '')
     }
+
+def logout_url() -> str:
+    return ''.join([s.LOGOUT_URL, f'?post_logout_redirect_uri={s.HOST + reverse(s.INDEX_REDIRECT)}'])
 
 # is this needed??? 
 def get_logout_url() -> None:
