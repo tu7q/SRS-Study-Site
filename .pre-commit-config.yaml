@@ -9,3 +9,11 @@ repos:
 #     rev: 3.9.2
 #     hooks:
 #     - id: flake8
+-   repo: local
+    hooks:
+      - id: django-test
+        name: django-test
+        entry: python WebApp/manage.py test WebApp
+        always_run: true
+        pass_filenames: false
+        language: system
