@@ -68,9 +68,7 @@ def get_token_from_code(request: HttpRequest) -> Dict[str, Any]:  # close enough
 
 def get_user(token: Dict[str, Any]) -> Dict[str, str]:  # Should be accurate enough
     access_token = token.get("access_token", "")
-    r = requests.get(
-        url=f"{s.GRAPH_URL}/me", headers={"Authorization": f"Bearer {access_token}"}
-    )
+    r = requests.get(url=f"{s.GRAPH_URL}/me", headers={"Authorization": f"Bearer {access_token}"})
     if r.status_code == requests.status_codes.codes.ok:
         return r.json()
     return {}  # empty lmao
@@ -85,9 +83,7 @@ def store_user(session: SessionBase, user: Dict[str, str]) -> None:  # close eno
 
 
 def logout_url() -> str:
-    return (
-        s.LOGOUT_URL + "?post_logout_redirect_uri=" + s.HOST + reverse(s.INDEX_REDIRECT)
-    )
+    return s.LOGOUT_URL + "?post_logout_redirect_uri=" + s.HOST + reverse(s.INDEX_REDIRECT)
 
 
 def is_authenticated(session: SessionBase) -> bool:
