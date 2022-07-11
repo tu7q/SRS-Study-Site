@@ -28,8 +28,8 @@ def Logout(request: HttpRequest) -> HttpResponse:
 
 def Callback(request: HttpRequest) -> HttpResponse:
     token = utils.get_token_from_code(request)
-    if token is None or 'error' in token:
-        return render(request, 'MicrosoftAuthentication/login.html', context={'error': token.get('error')})
+    if token is None or "error" in token:
+        return render(request, "MicrosoftAuthentication/login.html", context={"error": token.get("error")})
     ms_user = utils.get_user(token)
     utils.store_user(request.session, ms_user)
     return redirect(s.INDEX_REDIRECT)

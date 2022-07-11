@@ -2,7 +2,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from django.http import HttpRequest
 from django.urls import reverse
 from typing import Any, Dict
-from . import settings as s 
+from . import settings as s
 import requests
 import msal
 
@@ -90,5 +90,3 @@ def is_authenticated(session: SessionBase) -> bool:
     if user.get("is_authenticated", False):
         return True
     return False
-
-
