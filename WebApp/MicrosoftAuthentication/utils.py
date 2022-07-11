@@ -1,11 +1,10 @@
 from django.contrib.sessions.backends.base import SessionBase
-from typing import Any, Dict, Optional
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect
-from . import settings as s
+from django.http import HttpRequest
+from django.urls import reverse
+from typing import Any, Dict
+from . import settings as s 
 import requests
 import msal
-from django.urls import reverse
 
 
 def load_cache(session: SessionBase) -> msal.SerializableTokenCache:
@@ -91,3 +90,5 @@ def is_authenticated(session: SessionBase) -> bool:
     if user.get("is_authenticated", False):
         return True
     return False
+
+

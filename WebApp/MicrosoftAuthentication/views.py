@@ -22,16 +22,14 @@ def Login(request: HttpRequest) -> HttpResponse:
 
 
 def Logout(request: HttpRequest) -> HttpResponse:
-    # django logout(request)
-    # return HttpResponseRedirect(get_logout_url())
     utils.clear_cache(request.session)
     return redirect(utils.logout_url())
 
 
 def Callback(request: HttpRequest) -> HttpResponse:
     token = utils.get_token_from_code(request)
+    if token is None or 'error' in token:
+        return render(request, 'MicrosoftAuthentication/login.html', context={'error': token.get('error')})
     ms_user = utils.get_user(token)
-    if ms_user is None:
-        return redirect("error")
     utils.store_user(request.session, ms_user)
     return redirect(s.INDEX_REDIRECT)
