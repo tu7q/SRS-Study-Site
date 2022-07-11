@@ -18,7 +18,7 @@ from django.urls import path, include
 
 
 urlpatterns = [
-    path('', include('MicrosoftAuthentication.urls')),
-    path('Questions/', include('SRS.urls')),
-    path('admin/', admin.site.urls)
+    path("", include("MicrosoftAuthentication.urls")),
+    path("Questions/", include("SRS.urls")),
+    path("admin/", admin.site.urls),
 ]

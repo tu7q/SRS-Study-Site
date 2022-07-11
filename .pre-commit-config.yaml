@@ -4,8 +4,8 @@ repos:
     hooks:
     - id: black
       language_version: python3.10
-      args: ['-t', py310]
--   repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
-    hooks:
-    - id: flake8
+      args: ['-t', py310] # I hope this is the correct way to version
+# -   repo: https://gitlab.com/pycqa/flake8
+#     rev: 3.9.2
+#     hooks:
+#     - id: flake8
