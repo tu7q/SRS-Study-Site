@@ -1,0 +1,11 @@
+repos:
+-   repo: https://github.com/psf/black
+    rev: 22.6.0
+    hooks:
+    - id: black
+      language_version: python3.10
+      args: ['-t', py310, '--line-length=120'] # I hope this is the correct way to version
+# -   repo: https://gitlab.com/pycqa/flake8
+#     rev: 3.9.2
+#     hooks:
+#     - id: flake8

@@ -1,0 +1,5 @@
+django
+msal
+
+pre-commit
+black
