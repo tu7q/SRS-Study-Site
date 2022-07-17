@@ -1,3 +1,5 @@
+# WebApp/MicrosoftAuthentication/settings.py
+
 # some important constants
 
 HOST = "http://localhost:8000"

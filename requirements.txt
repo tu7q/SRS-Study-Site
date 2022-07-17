@@ -1,5 +1,6 @@
 django
 msal
+celery
 
 pre-commit
 black

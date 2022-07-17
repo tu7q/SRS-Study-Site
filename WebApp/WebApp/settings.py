@@ -33,7 +33,7 @@ LOGIN_REDIRECT_URL = ""
 
 INSTALLED_APPS = [
     "MicrosoftAuthentication",
-    "SRS.apps.SrsConfig",
+    "SRS",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -124,3 +124,9 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Celery Config Options
+CELERY_TIMEZONE = ""
+CELERY_TASL_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60

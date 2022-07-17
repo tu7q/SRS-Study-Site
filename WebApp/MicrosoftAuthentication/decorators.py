@@ -1,3 +1,5 @@
+# WebApp/MicrosoftAuthentication/decorators.py
+
 from functools import wraps
 from django.http import HttpRequest, HttpResponse
 from typing import Callable

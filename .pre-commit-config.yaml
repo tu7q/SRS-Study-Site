@@ -5,10 +5,17 @@ repos:
     - id: black
       language_version: python3.10
       args: ['-t', py310, '--line-length=120'] # I hope this is the correct way to version
-# -   repo: https://gitlab.com/pycqa/flake8
-#     rev: 3.9.2
+# -   repo: https://github.com/pycqa/flake8
+#     rev: 4.0.1
 #     hooks:
-#     - id: flake8
+#     -   id: flake8
+#         additional_dependencies: [
+#         'flake8-annotations-complexity',
+#         'flake8-functions',
+#         'flake8-expression-complexity',
+#         'flake8-cognitive-complexity',
+#         'flake8-django'
+#     ]
 -   repo: local
     hooks:
       - id: django-test

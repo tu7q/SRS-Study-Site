@@ -1,3 +1,5 @@
+# WebApp/MicrosoftAuthentication/tests.py
+
 # Django testing tools
 from django.test import TestCase
 from django.test import Client
@@ -13,8 +15,6 @@ from unittest.mock import Mock, patch
 
 # App info to test
 from . import utils
-from . import decorators
-from . import views
 
 import msal
 
