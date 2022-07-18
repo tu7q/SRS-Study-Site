@@ -125,8 +125,21 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+from celery.schedules import crontab
 
 # Celery Config Options
-CELERY_TIMEZONE = ""
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
+# probably works.
+CELERY_BEAT_SCHEDULE = {
+    "clear-session-midnight-daily": {
+        "task": "MicrosoftAuthentication.tasks.session_cleanup",
+        "schedule": crontab(minute=0, hour=0),  # daily at midnight
+        "options": {"expires": 15.0},  # if task fails to start in 15 seconds it won't run at all
+    }
+}
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASL_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60

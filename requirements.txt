@@ -1,6 +1,7 @@
-django
-msal
-celery
+Django==4.0.6
+msal==1.18.0
+celery==5.2.7
+redis==4.3.4 # celery broker
 
-pre-commit
-black
+pre-commit==2.20.0
+black==22.6.0
