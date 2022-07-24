@@ -1,48 +1,59 @@
 from django.shortcuts import redirect, render
-from django.http import HttpRequest, HttpResponse, Http404
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    Http404,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
+from django.views import View
 from MicrosoftAuthentication.decorators import RequireMSAuthentication
-
-ANSWERED_QUESTIONS = "ANSWERED_QUESTIONS"
-QUESTIONS_PER_DAY = 10
+from . import utils
+from typing import List
+from . import models
 
 # List of possible subjects
-@RequireMSAuthentication
+# @RequireMSAuthentication
 def Index(request: HttpRequest) -> HttpResponse:
     pass
 
 
-def Question(request: HttpRequest, subject: str) -> HttpResponse:
-    # is subject a valid subject
-    if not Subject.objects.exists():
-        raise Http404("Subject does not exist")
+class Question(View):
+    # dispatcher: QuestionDispatcher = QuestionDispatcher()
+    valid_subjects: List[str] = utils.all_subjects()
 
-    if request.method == "POST":
-        return question_post(request, subject)
-    return question_get(request, subject)
+    # @RequireMSAuthentication
+    def get(self, request: HttpRequest, subject: str = "") -> HttpResponse:
+        subject = subject.lower()
 
+        if subject not in Question.valid_subjects:
+            raise Http404
 
-# request.method is not neccesarily get
-@RequireMSAuthentication
-def question_get(request: HttpRequest, subject: str) -> HttpResponse:
-    # load current question from session.
-    answered_questions = request.session.get(ANSWERED_QUESTIONS, 0)
-    if answered_questions >= QUESTIONS_PER_DAY:
-        return render("finnished_today.html")
-    # load next question
-    next_question = ...
-    context = {"": next_question}
-    # return the question for answering
-    return HttpResponse()
+        if subject in request.session:
+            print("subject in session")
+            question = request.session[subject]
+        else:
+            print("subject not in session")
+            # models.next(subject)
+            question = "hi!"
+        request.session[subject] = question
 
+        return HttpResponse(f"Hello There!")
+        # return render("template", context={"question": question})
 
-@RequireMSAuthentication
-def question_post(request: HttpRequest, subject: str) -> HttpResponse:
-    pass
-    # get answer to question
-    # check answer
-    if request.session[ANSWERED_QUESTIONS] == None:
-        request.session[ANSWERED_QUESTIONS] = 1
-    else:
-        request.session[ANSWERED_QUESTIONS] += 1
-    # increase answered_questions
-    # return result
+    # @RequireMSAuthentication
+    def post(self, request: HttpRequest, subject: str = None) -> HttpResponse:
+        subject = subject.lower()
+        if subject not in Question.valid_subjects:
+            raise Http404
+
+        # clear and retrieve the subject from the session
+        question = request.session.pop(subject, None)
+        if question is None:  # didn't make get request so subject and question pair don't exist.
+            raise HttpResponseBadRequest
+        question.fill(request.POST)  # fill the question with the users answers.
+        marked_question = question.mark()  # get the marked question
+
+        models.return_to_queue(question)  # Question is not needed and is placed in the queue
+
+        return JsonResponse(marked_question)
