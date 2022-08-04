@@ -7,7 +7,6 @@ from django.http import (
     JsonResponse,
 )
 from django.views import View
-from MicrosoftAuthentication.decorators import RequireMSAuthentication
 from . import utils
 from typing import List
 from . import models
@@ -15,7 +14,7 @@ from . import models
 # List of possible subjects
 # @RequireMSAuthentication
 def Index(request: HttpRequest) -> HttpResponse:
-    pass
+    return render(request, "SRS/index.html")
 
 
 class Question(View):

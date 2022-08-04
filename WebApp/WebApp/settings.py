@@ -32,7 +32,7 @@ LOGIN_REDIRECT_URL = ""
 # Application definition
 
 INSTALLED_APPS = [
-    "MicrosoftAuthentication",
+    "Auth",
     "SRS",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 ]
+
+AUTH_USER_MODEL = "Auth.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -51,6 +53,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+AUTHENTICATION_BACKENDS = ["Auth.backends.MicrosoftAuthentication"]
 
 ROOT_URLCONF = "WebApp.urls"
 
@@ -133,7 +137,7 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
 # probably works.
 CELERY_BEAT_SCHEDULE = {
     "clear-session-midnight-daily": {
-        "task": "MicrosoftAuthentication.tasks.session_cleanup",
+        "task": "WebApp.celery.session_cleanup",
         "schedule": crontab(minute=0, hour=0),  # daily at midnight
         "options": {"expires": 15.0},  # if task fails to start in 15 seconds it won't run at all
     }

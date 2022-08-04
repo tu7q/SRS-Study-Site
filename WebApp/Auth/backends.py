@@ -1,0 +1,81 @@
+from typing import Any, Optional
+from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth import get_user_model
+from django.http import HttpRequest
+import msal
+import requests
+
+UserModel = get_user_model()
+
+# ms app settings
+HOST = "http://localhost:8000"
+
+APP_ID = "6db743c4-b783-4604-9808-799282822dcb"
+APP_SECRET = "lST8Q~HZYeHUzm2b9JZ~1AsyHS9avPpkwSnSUaHU"
+REDIRECT = HOST + "/auth/callback"
+SCOPES = ["https://graph.microsoft.com/user.read"]
+AUTHORITY = "https://login.microsoftonline.com/organizations"
+VALID_EMAIL_DOMAINS = "bayfield-high.school.nz"
+
+LOGOUT_URL = AUTHORITY + "/oauth2/v2.0/logout"  # should this be URI?
+
+# MS graph url
+GRAPH_URL = "https://graph.microsoft.com/v1.0"  # whatever it was
+
+
+class MicrosoftAuthentication(BaseBackend):
+    SESSION_KEY = "MICROSOFT"
+    AUTH = "MICROSOFT"
+
+    def setup(self, request) -> str:
+        app = self._get_confidential_app()
+        flow = app.initiate_auth_code_flow(SCOPES, max_age=10 * 60)
+        self.to_store(request, flow)
+        return flow["auth_uri"]
+
+    def authenticate(self, request):
+        flow = self.from_store(request)
+        if not flow:
+            return
+        app = self._get_confidential_app()
+        try:
+            token = app.acquire_token_by_auth_code_flow(flow, request.GET)
+        except ValueError:
+            return
+        if "error" in token:
+            return
+        ms_user = self._get_user(token)
+        if not ms_user:
+            return
+        user, created = UserModel._default_manager.get_or_create(**ms_user)
+        return user
+
+    def get_user(self, user_pk):
+        try:
+            user = UserModel._default_manager.get(pk=user_pk)
+        except UserModel.DoesNotExist:
+            return None
+        return user
+        # return user if self.user_can_authenticate(user) else None
+
+    @classmethod
+    def _get_confidential_app(cls):
+        return msal.ConfidentialClientApplication(APP_ID, authority=AUTHORITY, client_credential=APP_SECRET)
+
+    def to_store(self, request: HttpRequest, data: Any) -> None:
+        request.session[self.SESSION_KEY] = data
+
+    def from_store(self, request: HttpRequest) -> Optional[Any]:
+        return request.session.get(self.SESSION_KEY)
+
+    @classmethod
+    def _get_user(cls, token):
+        access_token = token.get("access_token", "")
+        r = requests.get(url=f"{GRAPH_URL}/me", headers={"Authorization": f"Bearer {access_token}"})
+        if r.status_code == requests.status_codes.codes.ok:
+            user = r.json()
+            return {
+                "email": user["mail"],  # must contain mail field
+                "name": user.get("displayName", ""),  # displayName is optional
+            }
+        return None
