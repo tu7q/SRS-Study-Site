@@ -27,12 +27,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = ""
+LOGIN_URL = "Login"
+LOGIN_REDIRECT_URL = "Index"
 
 # Application definition
 
 INSTALLED_APPS = [
-    "Auth",
+    "MicrosoftAuth",
     "SRS",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -42,7 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
-AUTH_USER_MODEL = "Auth.User"
+AUTH_USER_MODEL = "MicrosoftAuth.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -54,7 +55,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-AUTHENTICATION_BACKENDS = ["Auth.backends.MicrosoftAuthentication"]
+AUTHENTICATION_BACKENDS = ["MicrosoftAuth.backends.MicrosoftAuthentication"]
 
 ROOT_URLCONF = "WebApp.urls"
 

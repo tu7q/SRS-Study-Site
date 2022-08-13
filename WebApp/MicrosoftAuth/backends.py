@@ -48,15 +48,25 @@ class MicrosoftAuthentication(BaseBackend):
         if not ms_user:
             return
         user, created = UserModel._default_manager.get_or_create(**ms_user)
-        return user
+        if self.user_can_authenticate(user):
+            return user
 
     def get_user(self, user_pk):
         try:
             user = UserModel._default_manager.get(pk=user_pk)
         except UserModel.DoesNotExist:
             return None
-        return user
+        if self.user_can_authenticate(user):
+            return user
         # return user if self.user_can_authenticate(user) else None
+
+    def user_can_authenticate(self, user):
+        """
+        Reject users with is_active=False. Custom user models that don't have
+        that attribute are allowed.
+        """
+        is_active = getattr(user, "is_active", None)
+        return is_active or is_active is None
 
     @classmethod
     def _get_confidential_app(cls):

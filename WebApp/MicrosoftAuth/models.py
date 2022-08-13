@@ -93,7 +93,7 @@ class User(PermissionsMixin):
         """
         Return an HMAC of the password field.
         """
-        key_salt = "Auth.models.User.get_session_auth_hash"
+        key_salt = "MicrosoftAuth.models.User.get_session_auth_hash"
         return salted_hmac(
             key_salt,
             self.email,

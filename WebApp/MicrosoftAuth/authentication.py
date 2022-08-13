@@ -2,10 +2,10 @@ from django.views.decorators.debug import sensitive_variables
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.conf import settings
 
-from Auth.backends import MicrosoftAuthentication
+from MicrosoftAuth.backends import MicrosoftAuthentication
 from django.contrib import auth
 
-BACKEND_PATH = "Auth.backends.MicrosoftAuthentication"
+BACKEND_PATH = "MicrosoftAuth.backends.MicrosoftAuthentication"
 BACKEND = MicrosoftAuthentication()
 
 if BACKEND_PATH not in settings.AUTHENTICATION_BACKENDS:

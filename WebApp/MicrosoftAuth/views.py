@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
+
 from .authentication import authenticate, BACKEND, BACKEND_PATH
 from django.contrib.auth import login, logout
+from django.conf import settings
 
 
 def Login(request):
@@ -13,10 +15,10 @@ def Callback(request):
     if user:
         login(request, user, backend=BACKEND_PATH)
     # settings.INDEX -> EEK
-    return redirect("Index")
+    return redirect(settings.LOGIN_REDIRECT_URL)
 
 
 def Logout(request):
     logout(request)
     # settings.INDEX -> EEK
-    return redirect("Index")
+    return redirect(settings.LOGIN_URL)
