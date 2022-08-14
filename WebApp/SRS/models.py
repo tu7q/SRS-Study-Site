@@ -1,14 +1,27 @@
 from __future__ import annotations
-from enum import Enum, auto
+
+import time
+from collections import namedtuple
+from dataclasses import dataclass
+from datetime import datetime
+from enum import auto
+from enum import Enum
+from functools import lru_cache
 from statistics import mean
+from typing import Any
+from typing import Dict
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Type
+
 from django.db import models
 from MicrosoftAuth.models import User
-import time
-from typing import Any, Dict, Optional, Tuple, Type, List, Iterator
+
 from . import questions as q
-from .multifield import MultiField, MultiFieldBase
-from datetime import datetime
-from dataclasses import dataclass
+from .multifield import MultiField
+from .multifield import MultiFieldBase
 
 # import inspect
 
@@ -18,7 +31,11 @@ def QuestionField(q_type: Type[q.QuestionInfo]) -> MultiField:
         return q_type(forbidden_until=forbidden_until, last_score=last_score, seed=seed)
 
     def set(value: q.QuestionInfo) -> Dict[str, Any]:
-        return {"forbidden_until": value.forbidden_until, "last_score": value.last_score, "seed": value.seed}
+        return {
+            "forbidden_until": value.forbidden_until,
+            "last_score": value.last_score,
+            "seed": value.seed,
+        }
 
     return MultiField(
         get,
@@ -29,41 +46,37 @@ def QuestionField(q_type: Type[q.QuestionInfo]) -> MultiField:
     )
 
 
-class Subject(Enum):
-    """
-    Subjects don't express any behaviour other than to act as a category.
-    """
-
-    chemistry = auto()
-    physics = auto()
+QuestionTuple = namedtuple("question", "attrname val")
 
 
 class Assesment(MultiFieldBase):
     """Note: Is empty for reasons"""
 
-    SUBJECT: Subject = None
-    NAME: str = None
-    STANDARD: str = None
-    LEVEL: int = None
+    NAME: str = None  # should be unique
+    STANDARD: str = None  # should be unique
+    LEVEL: int = None  # shouldn't be unique
 
-    registry: Dict[str, Type[Assesment]] = {subject: list() for subject in Subject}
+    assesments: List[Type[Assesment]] = []
+    names: Dict[str, int] = {}
+    standards: Dict[str, int] = {}
+    levels = [int]
 
     def __init_subclass__(cls) -> None:
-        if isinstance(cls.SUBJECT, Subject):
-            cls.registry[cls.SUBJECT].append(cls)
+        cls.assesments.append(cls)
+        cls.names[cls.NAME] = len(cls.assesments) - 1
+        cls.standards[cls.STANDARD] = len(cls.assesments) - 1
+        cls.levels.append(cls.LEVEL)
         return super().__init_subclass__()
 
-    @classmethod
-    def assesments(cls, subject: Subject) -> List[Type[Assesment]]:
-        return cls.registry[subject]
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     average_score = models.FloatField()
 
     class Meta:
         abstract = True
 
-    def question_fields(self) -> Iterator[Tuple[str, q.QuestionInfo]]:  # technically Generator not Iterator
+    def question_fields(
+        self,
+    ) -> Iterator[Tuple[str, q.QuestionInfo]]:  # technically Generator not Iterator
         for field_name in self.multifields:
             field = getattr(self, field_name)
             if isinstance(field, q.QuestionInfo):
@@ -72,11 +85,11 @@ class Assesment(MultiFieldBase):
     def next_question(self) -> Optional[q.QuestionInfo]:
         most_recent = datetime.now()
         best = None
-        for _, field in self.question_fields():
+        for name, field in self.question_fields():
             if field.forbidden_until < most_recent:
                 # field.forbidden_until is more recent than most_recent field
                 most_recent = field.forbidden_until
-                best = field
+                best = QuestionTuple(name, field)
         # if best is None then none were more recent than the current date so there is no question to return.
         return best
 
@@ -93,7 +106,6 @@ class Assesment(MultiFieldBase):
 
 
 class AS91391(Assesment):
-    SUBJECT = Subject.chemistry
     NAME = "Demonstrate understanding of the properties of organic compounds"
     STANDARD = 91391
     LEVEL = 3

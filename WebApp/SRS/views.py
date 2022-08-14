@@ -1,67 +1,100 @@
-from django.shortcuts import redirect, render
-from django.http import (
-    HttpRequest,
-    HttpResponse,
-    Http404,
-    HttpResponseBadRequest,
-    JsonResponse,
-)
-from django.views import View
+from types import NoneType
 from typing import List
-from . import models
+from typing import Type
+
 from django.conf import settings
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from .models import Subject
+from django.http import Http404
+from django.http import HttpRequest
+from django.http import HttpResponse
+from django.http import HttpResponseBadRequest
+from django.http import HttpResponseGone
+from django.http import JsonResponse
+from django.shortcuts import redirect
+from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views import View
+
+from . import models
 from .models import Assesment
+from .models import QuestionTuple
 
-# view list subjects
-# returs subjects
-# clicks a subject
-# view list assesments
-# returns assesments for a subject
-# clicks assesment
-# view Question
-# returns a question to answer
-# answer question
-# view Answer
-# returns a worked answer (in JSON)
-# view Mark
-# marks answer and returns next question
-
-all_subjects = [s.name for s in Subject]
-
-subject_to_assesments = {s.name: Assesment.assesments(s) for s in Subject}
+CURRENT_QUESTION = "CURRENT_QUESTION"
 
 
-class ListSubjectsView(View):
-    @method_decorator(login_required)
-    def get(self, request: HttpRequest) -> HttpResponse:
-        return render(request, "SRS/subjects.html", context={"subjects": all_subjects})
+def valid_standard(standard: str) -> bool:
+    val = Assesment.standard.get(standard, None)
+    return type(val) != NoneType
+
+
+def get_assesment_model(standard: str) -> Type[Assesment]:
+    return Assesment.assesments[Assesment.standards[standard]]
+
+
+def get_question(request: HttpRequest, standard: str) -> QuestionTuple:
+    question = request.session.get(CURRENT_QUESTION)
+    if question is None:
+        model = get_assesment_model(standard)
+        assesment = model.objects.get_or_create(user=request.user)
+        question = assesment.next_question()
+        request.session[CURRENT_QUESTION] = question
+    return question
 
 
 class ListAssesmentsView(View):
     @method_decorator(login_required)
-    def get(self, request: HttpRequest, subject: str = None):
-        return render(request, "SRS/assesments.html", context={"assesments": subject_to_assesments[subject]})
+    def get(self, request: HttpRequest):
+        return render(
+            request,
+            "SRS/assesments.html",
+            context={"assesments": Assesment.assesments},
+        )
 
 
 class Question(View):
     @method_decorator(login_required)
-    def get(self, request: HttpRequest, assesment: str = None) -> HttpResponse:
-        return render(request, "SRS/question.html")
+    def get(self, request: HttpRequest, standard: str = None) -> HttpResponse:
+        if not valid_standard(standard):
+            raise Http404
+        question = get_question(request, standard)
+        return render(request, "SRS/question.html", context={"question": question})
 
 
 class Answer(View):
     @method_decorator(login_required)
-    def get(self, request: HttpRequest, subject: str = None):
-        pass
+    def get(self, request: HttpRequest, standard: str = None):
+        if not valid_standard(standard):
+            raise Http404
+        question = get_question(request, standard)
+        if question:
+            answer = question.val.model_answer()
+            return JsonResponse({"model_answer": answer})
+        raise HttpResponseGone
 
 
 class Mark(View):
     @method_decorator(login_required)
-    def get(self, request: HttpRequest, subject: str = None):
-        pass
+    def get(self, request: HttpRequest, standard: str = None):
+        if not valid_standard(standard):
+            raise Http404
+        score = request.GET.get("score", None)
+        if not score:
+            raise HttpResponseBadRequest
+        question = get_question(request, standard)
+        if not question:
+            raise HttpResponseBadRequest
+        question.val.update(score)
+
+        attrname, question = request.session.get("current_question")
+        if not question:
+            raise HttpResponseBadRequest
+        question.update(score)
+        model = get_assesment_model(standard)
+        assesment = model.objects.get(user=request.user)
+        setattr(assesment, attrname, question.val)
+        request.session.pop("current_question")
+        model.save()
+        return redirect("Question")
 
     #     # subject = subject.lower()
 

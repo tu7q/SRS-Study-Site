@@ -1,3 +1,4 @@
+import time
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -9,6 +10,10 @@ class QuestionInfo:
     forbidden_until: datetime
     last_score: int
     seed: int
+
+    def update(self, new_score) -> None:
+        self.last_score = new_score
+        self.seed = time.time()
 
     @property
     def title(self) -> str:
