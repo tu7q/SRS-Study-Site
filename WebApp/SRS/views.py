@@ -1,5 +1,9 @@
+import datetime
+from tkinter import CURRENT
 from types import NoneType
+from typing import Any
 from typing import List
+from typing import Optional
 from typing import Type
 
 from django.conf import settings
@@ -15,123 +19,105 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views import View
 
-from . import models
-from .models import Assesment
-from .models import QuestionTuple
+from . import assesments
+from . import questions
 
-CURRENT_QUESTION = "CURRENT_QUESTION"
-
-
-def valid_standard(standard: str) -> bool:
-    val = Assesment.standard.get(standard, None)
-    return type(val) != NoneType
+# from django.utils import timezone
 
 
-def get_assesment_model(standard: str) -> Type[Assesment]:
-    return Assesment.assesments[Assesment.standards[standard]]
+def valid_standard(standard: int) -> bool:
+    a = assesments.standards.get(standard, None)
+    return type(a) != NoneType
 
 
-def get_question(request: HttpRequest, standard: str) -> QuestionTuple:
-    question = request.session.get(CURRENT_QUESTION)
-    if question is None:
-        model = get_assesment_model(standard)
-        assesment = model.objects.get_or_create(user=request.user)
-        question = assesment.next_question()
-        request.session[CURRENT_QUESTION] = question
+def get_assesment(standard: int) -> Optional[Type[assesments.Assesment]]:
+    return assesments.assesments[assesments.standards[standard]]
+
+
+class NoAvailableQuestion(Exception):
+    pass
+
+
+def question_from_db(request, standard):  # this is the first time the user is accessing the assesment
+    a_model = get_assesment(standard)
+    a_instance, created = a_model.objects.get_or_create(user=request.user)
+
+    if created:
+        qs = (q_model.objects.create(assesment=a_instance) for q_model in questions.questions[a_model])
+        question = min(qs, key=lambda q: q.forbidden_until)
+    else:
+        question = a_instance.questions.earliest("forbidden_until")
+        # qs = a_instance.questions.all()
+        # question = min(qs, key=lambda q: q.forbidden_until)
+    if question.forbidden_until > datetime.datetime.now():
+        raise NoAvailableQuestion()
+    return question
+
+
+def get_question(request: HttpRequest, standard: int, from_session=False) -> Optional[Any]:
+    session_key = str(standard)
+    if from_session:
+        try:
+            pk = request.session[session_key]
+            return questions.Question.objects.get(pk=pk)
+        except KeyError:
+            raise NoAvailableQuestion()
+    # models.Assesment
+    if session_key in request.session:
+        pk = request.session.get(session_key)
+        question = questions.Question.objects.get(pk=pk)
+    else:
+        question = question_from_db(request, standard)
+        request.session[session_key] = question.pk
     return question
 
 
 class ListAssesmentsView(View):
     @method_decorator(login_required)
     def get(self, request: HttpRequest):
+        print(assesments.assesments)
         return render(
             request,
             "SRS/assesments.html",
-            context={"assesments": Assesment.assesments},
+            context={"assesments": assesments.assesments},
         )
 
 
 class Question(View):
     @method_decorator(login_required)
-    def get(self, request: HttpRequest, standard: str = None) -> HttpResponse:
+    def get(self, request: HttpRequest, standard: int = None) -> HttpResponse:
         if not valid_standard(standard):
-            raise Http404
-        question = get_question(request, standard)
-        return render(request, "SRS/question.html", context={"question": question})
+            raise Http404()
+        try:
+            question = get_question(request, standard)
+        except NoAvailableQuestion:
+            return render(request, "SRS/no_question.html")
+        return render(request, "SRS/question.html", context={"question": question, "standard": standard})
 
 
 class Answer(View):
     @method_decorator(login_required)
-    def get(self, request: HttpRequest, standard: str = None):
+    def get(self, request: HttpRequest, standard: int = None):
         if not valid_standard(standard):
-            raise Http404
-        question = get_question(request, standard)
-        if question:
-            answer = question.val.model_answer()
-            return JsonResponse({"model_answer": answer})
-        raise HttpResponseGone
+            raise Http404()
+        try:
+            question = get_question(request, standard, from_session=True)
+        except NoAvailableQuestion:
+            return HttpResponseGone()
+
+        return JsonResponse({"model_answer": question.model_answer})
 
 
 class Mark(View):
     @method_decorator(login_required)
-    def get(self, request: HttpRequest, standard: str = None):
+    def get(self, request: HttpRequest, standard: int = None, score: int = None):
         if not valid_standard(standard):
-            raise Http404
-        score = request.GET.get("score", None)
-        if not score:
-            raise HttpResponseBadRequest
-        question = get_question(request, standard)
-        if not question:
-            raise HttpResponseBadRequest
-        question.val.update(score)
-
-        attrname, question = request.session.get("current_question")
-        if not question:
-            raise HttpResponseBadRequest
-        question.update(score)
-        model = get_assesment_model(standard)
-        assesment = model.objects.get(user=request.user)
-        setattr(assesment, attrname, question.val)
-        request.session.pop("current_question")
-        model.save()
-        return redirect("Question")
-
-    #     # subject = subject.lower()
-
-    #     # if subject not in Question.valid_subjects:
-    #     #     raise Http404
-
-    #     # if subject in request.session:
-    #     #     print("subject in session")
-    #     #     question = request.session[subject]
-    #     # else:
-    #     #     print("subject not in session")
-    #     #     # models.next(subject)
-    #     #     question = "hi!"
-    #     # request.session[subject] = question
-
-    #     # return HttpResponse(f"Hello There!")
-    #     # return render("template", context={"question": question})
-
-    # @method_decorator(login_required)
-    # def post(self, request: HttpRequest, assesment: str = None) -> HttpResponse:
-    #     return JsonResponse({'hello': 5})
-    #     pass
-    #     # subject = subject.lower()
-    #     # if subject not in Question.valid_subjects:
-    #     #     raise Http404
-
-    #     # # clear and retrieve the subject from the session
-    #     # question = request.session.pop(subject, None)
-    #     # if (
-    #     #     question is None
-    #     # ):  # didn't make get request so subject and question pair don't exist.
-    #     #     raise HttpResponseBadRequest
-    #     # question.fill(request.POST)  # fill the question with the users answers.
-    #     # marked_question = question.mark()  # get the marked question
-
-    #     # models.return_to_queue(
-    #     #     question
-    #     # )  # Question is not needed and is placed in the queue
-
-    #     # return JsonResponse(marked_question)
+            raise Http404()
+        try:
+            question = get_question(request, standard, from_session=True)
+        except NoAvailableQuestion:
+            return HttpResponseBadRequest()
+        del request.session[str(standard)]  # this is the end of session so remove from here.
+        question.mark(score)
+        question.save()
+        return redirect("QuestionView", standard=standard)

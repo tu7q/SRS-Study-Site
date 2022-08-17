@@ -1,1 +1,11 @@
 <p>Question for an assesment</p>
+<p>{{ question.title }}</p>
+<p>{{ question.content }}</p>
+<p>{{ question.model_answer }}</p>
+<a href="{% url 'AnswerView' standard=standard %}">View Answers</a>
+<a href="{% url 'MarkView' standard=standard score=1 %}">Mark Question 0</a>
+<a href="{% url 'MarkView' standard=standard score=1 %}">Mark Question 1</a>
+<a href="{% url 'MarkView' standard=standard score=2 %}">Mark Question 2</a>
+<a href="{% url 'MarkView' standard=standard score=3 %}">Mark Question 3</a>
+<a href="{% url 'MarkView' standard=standard score=4 %}">Mark Question 4</a>
+<a href="{% url 'MarkView' standard=standard score=5 %}">Mark Question 5</a>
