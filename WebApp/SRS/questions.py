@@ -18,7 +18,7 @@ OFFSET = 1
 
 def lockout_duration(score: int):
     # the higher the score the longer the duration (so the questions with lower score get returned more often)
-    return datetime.timedelta(minutes=30 * score + OFFSET)
+    return datetime.timedelta(seconds=score + OFFSET)
 
 
 questions: Dict[assesments.Assesment, Set[Type[Question]]] = {}

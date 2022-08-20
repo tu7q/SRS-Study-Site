@@ -16,6 +16,7 @@ from django.http import HttpResponseGone
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 
@@ -75,7 +76,6 @@ def get_question(request: HttpRequest, standard: int, from_session=False) -> Opt
 class ListAssesmentsView(View):
     @method_decorator(login_required)
     def get(self, request: HttpRequest):
-        print(assesments.assesments)
         return render(
             request,
             "SRS/assesments.html",
@@ -92,7 +92,16 @@ class Question(View):
             question = get_question(request, standard)
         except NoAvailableQuestion:
             return render(request, "SRS/no_question.html")
-        return render(request, "SRS/question.html", context={"question": question, "standard": standard})
+        return render(
+            request,
+            "SRS/question.html",
+            context={
+                "question": question,
+                "standard": standard  # ,
+                # wish there was a template tag for this
+                # "model_answer_url": request.build_absolute_uri(reverse('AnswerView', kwargs={'standard': standard}))
+            },
+        )
 
 
 class Answer(View):

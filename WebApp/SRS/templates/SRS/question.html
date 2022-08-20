@@ -1,11 +1,40 @@
+{% load SRS_tags %}
+
 <p>Question for an assesment</p>
 <p>{{ question.title }}</p>
 <p>{{ question.content }}</p>
 <p>{{ question.model_answer }}</p>
-<a href="{% url 'AnswerView' standard=standard %}">View Answers</a>
+
+<button id="fetchdata">View Answers</button>
+<div id="result"></div>
+
 <a href="{% url 'MarkView' standard=standard score=1 %}">Mark Question 0</a>
 <a href="{% url 'MarkView' standard=standard score=1 %}">Mark Question 1</a>
 <a href="{% url 'MarkView' standard=standard score=2 %}">Mark Question 2</a>
 <a href="{% url 'MarkView' standard=standard score=3 %}">Mark Question 3</a>
 <a href="{% url 'MarkView' standard=standard score=4 %}">Mark Question 4</a>
 <a href="{% url 'MarkView' standard=standard score=5 %}">Mark Question 5</a>
+
+{% absurl 'AnswerView' standard=standard as AnswerViewUrl %}
+{{ AnswerViewUrl|json_script:"AnswerUrl" }}
+
+<script>
+    const AnswerUrl = JSON.parse(document.getElementById('AnswerUrl').textContent);
+    const fetchDataBtn = document.querySelector('#fetchdata')
+    const result = document.querySelector('#result')
+
+    // gets data from API and sets the content of #result div
+    const getData = function() {
+    result.innerText = 'Loading....'
+    fetch(AnswerUrl)
+        .then(res => res.json())
+        .then(data => {
+            result.innerText = data['model_answer']
+            // result.innerText = JSON.stringify(data, null, 2)
+        })
+        .catch(error => console.log(error))
+    }
+
+    // add event listener for #fetchdata button
+    fetchDataBtn.addEventListener('click', getData)
+</script>
