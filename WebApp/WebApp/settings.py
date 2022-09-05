@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,13 +26,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = ""
+LOGIN_URL = "Login"
+LOGIN_REDIRECT_URL = "Index"
 
 # Application definition
 
 INSTALLED_APPS = [
-    "MicrosoftAuthentication",
-    "SRS.apps.SrsConfig",
+    "polymorphic",  # app that allows models to be polymorphic
+    "MicrosoftAuth",
+    "SRS",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,6 +42,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 ]
+
+AUTH_USER_MODEL = "MicrosoftAuth.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -51,6 +54,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+AUTHENTICATION_BACKENDS = ["MicrosoftAuth.backends.MicrosoftAuthentication"]
 
 ROOT_URLCONF = "WebApp.urls"
 
@@ -112,7 +117,7 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False  # Time isn't super important for this website, only lengths are.
 
 
 # Static files (CSS, JavaScript, Images)
@@ -124,3 +129,22 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+from celery.schedules import crontab
+
+# Celery Config Options
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
+# probably works.
+CELERY_BEAT_SCHEDULE = {
+    "clear-session-midnight-daily": {
+        "task": "WebApp.celery.session_cleanup",
+        "schedule": crontab(minute=0, hour=0),  # daily at midnight
+        "options": {"expires": 15.0},  # if task fails to start in 15 seconds it won't run at all
+    }
+}
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASL_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
