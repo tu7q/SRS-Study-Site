@@ -36,6 +36,7 @@ class Assesment(PolymorphicModel):
 
     def save(self, *args, **kwargs):
         if not isinstance(self.avg_score, numbers.Number):
+            # When avg_score is None or null force it to 0
             self.avg_score = 0  # just set to something pointless for now
 
         super().save(*args, **kwargs)
