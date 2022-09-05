@@ -1,4 +1,4 @@
-Django==4.0.6
+Django==4.0.7
 msal==1.18.0
 celery==5.2.7
 redis==4.3.4 # celery broker
