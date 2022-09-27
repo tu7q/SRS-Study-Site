@@ -1,11 +1,60 @@
+{% extends 'SRS/base.html' %}
+
 {% load SRS_tags %}
+{% load static %}
+
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/star-rating.css' %}">
+{% endblock %}
+
+{% block content %}
+    {% include question %}
+    <div>
+        <!-- <button hx-get="{% absurl 'AnswerView' standard=standard %}" hx-trigger="click once" hx-target="closest div"> -->
+        <button hx-get="{% url 'AnswerView' standard=standard %}" hx-trigger="click once" hx-target="closest div">
+            View Answer
+        </button>
+    </div>
+
+    <div class="rate">
+        <input type="radio" id="star5" name="rate" value="5" />
+        <label for="star5" hx-trigger="click once" hx-target="body" hx-get="{% absurl 'MarkView' standard=standard score=5 %}">5 stars</label>
+        <input type="radio" id="star4" name="rate" value="4" />
+        <label for="star4" hx-trigger="click once" hx-target="body" hx-get="{% absurl 'MarkView' standard=standard score=4 %}">4 stars</label>
+        <input type="radio" id="star3" name="rate" value="3" />
+        <label for="star3" hx-trigger="click once" hx-target="body" hx-get="{% absurl 'MarkView' standard=standard score=3 %}">3 stars</label>
+        <input type="radio" id="star2" name="rate" value="2" />
+        <label for="star2" hx-trigger="click once" hx-target="body" hx-get="{% absurl 'MarkView' standard=standard score=2 %}">2 stars</label>
+        <input type="radio" id="star1" name="rate" value="1" />
+        <label for="star1" hx-trigger="click once" hx-target="body" hx-get="{% absurl 'MarkView' standard=standard score=1 %}">1 star</label>
+    </div>
+
+{% endblock %}
 
 <p>Question for an assesment</p>
-<p>{{ question.title }}</p>
-<p>{{ question.content }}</p>
-<p>{{ question.model_answer }}</p>
+{% include question %}
 
-<button id="fetchdata">View Answers</button>
+<textarea cols="60" rows="10" style="resize:vertical" >
+</textarea>
+
+<p>Go Away</p>
+
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <div>
+    <button hx-get="{% absurl 'AnswerView' standard=standard %}" hx-trigger="click once" hx-target="closest div">
+        View Answer
+    </button>
+
+    </div>
+    
+    <!-- <div hx-put="/assesment/{{ standard }}/" hx-trigger="click once">
+        <a>Put to Message</a>
+    </div> -->
+</body>
+
+
+<!-- <button id="fetchdata">View Answers</button> -->
 <div id="result"></div>
 
 <a href="{% url 'MarkView' standard=standard score=1 %}">Mark Question 0</a>
@@ -14,6 +63,7 @@
 <a href="{% url 'MarkView' standard=standard score=3 %}">Mark Question 3</a>
 <a href="{% url 'MarkView' standard=standard score=4 %}">Mark Question 4</a>
 <a href="{% url 'MarkView' standard=standard score=5 %}">Mark Question 5</a>
+
 
 {% absurl 'AnswerView' standard=standard as AnswerViewUrl %}
 {{ AnswerViewUrl|json_script:"AnswerUrl" }}
@@ -29,7 +79,8 @@
     fetch(AnswerUrl)
         .then(res => res.json())
         .then(data => {
-            result.innerText = data['model_answer']
+            // result.innerText = data['model_answer']
+            result.innerHTML = data['model_answer']
             // result.innerText = JSON.stringify(data, null, 2)
         })
         .catch(error => console.log(error))

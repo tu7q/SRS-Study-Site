@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "polymorphic",  # app that allows models to be polymorphic
     "MicrosoftAuth",
     "SRS",
+    "django_htmx",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -53,6 +54,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 AUTHENTICATION_BACKENDS = ["MicrosoftAuth.backends.MicrosoftAuthentication"]
@@ -124,6 +126,7 @@ USE_TZ = False  # Time isn't super important for this website, only lengths are.
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

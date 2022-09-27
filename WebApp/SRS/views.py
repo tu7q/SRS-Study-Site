@@ -1,13 +1,16 @@
 import datetime
+from msilib.schema import ListView
 from tkinter import CURRENT
 from types import NoneType
 from typing import Any
 from typing import List
 from typing import Optional
 from typing import Type
+from xmlrpc.client import _datetime_type
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.http import HttpRequest
 from django.http import HttpResponse
@@ -20,70 +23,74 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 
-from . import assesments
-from . import questions
+from .models import Assesment
+from .models import QAA
 
 # from django.utils import timezone
 
 
 def valid_standard(standard: int) -> bool:
-    a = assesments.standards.get(standard, None)
+    a = Assesment.FROM_STANDARDS.get(standard, None)
     return type(a) != NoneType
 
 
-def get_assesment(standard: int) -> Optional[Type[assesments.Assesment]]:
-    return assesments.assesments[assesments.standards[standard]]
+def get_assesment(standard: int):  # -> Optional[Type[assesments.Assesment]]:
+    return Assesment.ALL[Assesment.FROM_STANDARDS[standard]]
+    # return assesments.assesments[assesments.standards[standard]]
 
 
 class NoAvailableQuestion(Exception):
     pass
 
 
-def question_from_db(request, standard):  # this is the first time the user is accessing the assesment
+def get_question(request, standard):  # this is the first time the user is accessing the assesment
+    # note replace this with signals (because they're cleaner)
     a_model = get_assesment(standard)
-    a_instance, created = a_model.objects.get_or_create(user=request.user)
-
-    if created:
-        qs = (q_model.objects.create(assesment=a_instance) for q_model in questions.questions[a_model])
-        question = min(qs, key=lambda q: q.forbidden_until)
-    else:
-        question = a_instance.questions.earliest("forbidden_until")
-        # qs = a_instance.questions.all()
-        # question = min(qs, key=lambda q: q.forbidden_until)
+    a_instance, _ = a_model.objects.get_or_create(user=request.user)
+    question = a_instance.questions.earliest("forbidden_until")
     if question.forbidden_until > datetime.datetime.now():
         raise NoAvailableQuestion()
     return question
 
 
-def get_question(request: HttpRequest, standard: int, from_session=False) -> Optional[Any]:
-    session_key = str(standard)
-    if from_session:
-        try:
-            pk = request.session[session_key]
-            return questions.Question.objects.get(pk=pk)
-        except KeyError:
-            raise NoAvailableQuestion()
-    # models.Assesment
-    if session_key in request.session:
-        pk = request.session.get(session_key)
-        question = questions.Question.objects.get(pk=pk)
-    else:
-        question = question_from_db(request, standard)
-        request.session[session_key] = question.pk
-    return question
+def HXRedirect(url_name, **kwargs):
+    response = redirect(url_name, **kwargs)
+    response["HX-Redirect"] = reverse(url_name, kwargs=kwargs)
+    return response
 
 
 class ListAssesmentsView(View):
     @method_decorator(login_required)
     def get(self, request: HttpRequest):
+        # if 'results' in request.GET and request.GET['results']:
+
+        level = request.GET.get("level")
+        if level:
+            level = int(level)
+
+        params = request.GET.copy()
+        params.pop("page", None)  # just remove it.
+
+        if not "page" in request.GET:
+            return render(request, "SRS/assesments.html", context={"params": params})
+        page_n = int(request.GET["page"])
+
+        filtered = []
+        for i in Assesment.ALL:
+            if i.LEVEL == level:
+                filtered.append(i)
+
+        paginator = Paginator(filtered, per_page=3)
+        assesments = paginator.page(page_n)
+
         return render(
             request,
-            "SRS/assesments.html",
-            context={"assesments": assesments.assesments},
+            "SRS/assesments_page.html",
+            context={"assesments": assesments, "params": params},
         )
 
 
-class Question(View):
+class QuestionView(View):
     @method_decorator(login_required)
     def get(self, request: HttpRequest, standard: int = None) -> HttpResponse:
         if not valid_standard(standard):
@@ -91,42 +98,54 @@ class Question(View):
         try:
             question = get_question(request, standard)
         except NoAvailableQuestion:
-            return render(request, "SRS/no_question.html")
+            a_model = get_assesment(standard)
+            a_instance, created = a_model.objects.get_or_create(user=request.user)
+            question = a_instance.questions.earliest("forbidden_until")
+            return render(request, "SRS/no_question.html", context={"next_question": question})
         return render(
             request,
             "SRS/question.html",
-            context={
-                "question": question,
-                "standard": standard  # ,
-                # wish there was a template tag for this
-                # "model_answer_url": request.build_absolute_uri(reverse('AnswerView', kwargs={'standard': standard}))
-            },
+            context={"question": question, "standard": standard},  # ,
         )
 
+    # def put(self, request: HttpRequest, standard: int = None) -> HttpResponse:
+    #     # does this even get called? Can't remember.
+    #     if not valid_standard(standard):
+    #         raise Http404()
+    #     try:
+    #         q = get_question(request, standard)
+    #     except NoAvailableQuestion:
+    #         a_model = get_assesment(standard)
+    #         a_instance, created = a_model.objects.get_or_create(user=request.user)
+    #         question = a_instance.questions.earliest("forbidden_until")
+    #         return render(request, "SRS/no_question.html", context={'next_question': question})
+    #     return HttpResponse("<p>This is a response</p>")
 
-class Answer(View):
+
+class AnswerView(View):
     @method_decorator(login_required)
     def get(self, request: HttpRequest, standard: int = None):
         if not valid_standard(standard):
             raise Http404()
         try:
-            question = get_question(request, standard, from_session=True)
+            question = get_question(request, standard)
         except NoAvailableQuestion:
             return HttpResponseGone()
+        return HttpResponse(question.render(model_answer=True))
 
-        return JsonResponse({"model_answer": question.model_answer})
 
-
-class Mark(View):
+class MarkView(View):
     @method_decorator(login_required)
     def get(self, request: HttpRequest, standard: int = None, score: int = None):
         if not valid_standard(standard):
             raise Http404()
         try:
-            question = get_question(request, standard, from_session=True)
+            question = get_question(request, standard)
         except NoAvailableQuestion:
             return HttpResponseBadRequest()
-        del request.session[str(standard)]  # this is the end of session so remove from here.
         question.mark(score)
         question.save()
-        return redirect("QuestionView", standard=standard)
+        return HXRedirect("QuestionView", standard=standard)
+
+        # return redirect("QuestionView", standard=standard)
+        # return HttpResponse(status=204, headers={'HX-Redirect': reverse('QuestionView', kwargs={'standard': standard})})
