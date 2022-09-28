@@ -4,8 +4,10 @@ import datetime
 import logging
 import numbers
 import time
+from dataclasses import dataclass
 from enum import auto
 from enum import Enum
+from tkinter.messagebox import RETRY
 from typing import Type
 
 from django.core.validators import MaxValueValidator
@@ -19,6 +21,12 @@ from polymorphic.models import PolymorphicModel
 class ASType(Enum):
     Internal = auto()
     External = auto()
+
+
+import littletable as lt
+
+assesment_table = lt.Table("assesments")
+assesment_table.create_index("STANDARD", unique=True)
 
 
 class Assesment(PolymorphicModel):
@@ -44,6 +52,12 @@ class Assesment(PolymorphicModel):
             logging.warning(f"class {cls_name} ASTYPE is not an ASType instance")
         if not isinstance(cls.LEVEL, int):
             logging.warning(f"class {cls_name} LEVEL is not an int")
+
+        cls._search_term = " ".join([str(cls.STANDARD), "AS" + str(cls.STANDARD), cls.NAME])
+
+        # Add the associated assesment into the table.
+        assesment_table.insert(cls)
+        assesment_table.create_search_index("_search_term")  # build/rebuild the search index
 
         # logic
         cls.ALL.append(cls)
@@ -88,12 +102,21 @@ class QAA(PolymorphicModel):
     ALL = {}
 
     def __init_subclass__(cls) -> None:
+        # rename the class to avoid naming collisions
+        cls.__name__ = "AS" + str(cls.ASSESMENT.STANDARD) + "_" + cls.__name__
+
         # check the question
         if cls.ASSESMENT == None:
             logging.warning(f"class {cls.__name__} has not defined ASSESMENT.")
 
-        # rename the class to avoid naming collisions
-        cls.__name__ = cls.ASSESMENT.__name__ + "_" + cls.__name__
+        if cls.HEAD_TEMPLATE == None:
+            logging.warning(f"class {cls.__name__} has not defined HEAD_TEMPALTE.")
+
+        if cls.QUESTION_TEMPLATE == None:
+            logging.warning(f"class {cls.__name__} has not defined QUESTION_TEMPLATE.")
+
+        if cls.MODEL_ANSWER_TEMPLATE == None:
+            logging.warning(f"class {cls.__name__} has not defined MODEL_ANSWER_TEMPLATE.")
 
         cls.ALL.setdefault(cls.ASSESMENT, set())
         cls.ALL[cls.ASSESMENT].add(cls)
@@ -112,27 +135,46 @@ class QAA(PolymorphicModel):
         self.last_score = score
         self.forbidden_until = datetime.datetime.now() + lockout_duration(score)
 
+    HEAD_TEMPLATE: str = None
     MODEL_ANSWER_TEMPLATE: str = None
     QUESTION_TEMPLATE: str = None
 
+    def head_context(self):
+        return {}
+
     def question_context(self):
-        raise NotImplementedError()
+        return {}
 
     def answer_context(self):
-        raise NotImplementedError()
+        return {}
 
-    def render(self, question_content: bool = False, model_answer: bool = False) -> str:
-        if model_answer and question_content:
-            raise Exception("Question Content and Model Answer both selected")
+    def render(self, context={}, as_head=False, as_question: bool = False, as_answer: bool = False) -> str:
+        as_head = context.get("as_head", False) or as_head
+        as_question = context.get("as_question", False) or as_question
+        as_answer = context.get("as_answer", False) or as_answer
 
-        if question_content:
+        if [as_head, as_question, as_answer].count(True) > 1:
+            raise Exception("Only head, question_content or model_answer can't be used simultaneously")
+
+        print(f"render(context={context}, as_head={as_head}, content={as_question}, answer={as_answer}")
+
+        template = None
+        context = {}
+
+        if as_head:
+            context = self.head_context()
+            template = self.HEAD_TEMPLATE
+
+        if as_question:
             context = self.question_context()
-        if model_answer:
-            context = self.answer_context()
+            template = self.QUESTION_TEMPLATE
 
-        template = self.QUESTION_TEMPLATE
-        if model_answer:
+        if as_answer:
+            context = self.answer_context()
             template = self.MODEL_ANSWER_TEMPLATE
+
+        if template is None:
+            return ""
 
         return render_to_string(template, context, None, None)
 

@@ -7,7 +7,7 @@
 <form action="{{ request.path }}" method="GET">
     <!-- <input type="hidden" name="page" value="1" /> -->
 
-    <div>
+    <!-- <div>
         <input type="radio" id="levelChoice1"
          name="level" value="1">
         <label for="levelChoice1">Level 1</label>
@@ -20,6 +20,9 @@
          name="level" value="3">
         <label for="levelChoice3">Level 3</label>
       </div>
+     -->
+    <input type="text" id="search" name="search" required 
+        minlength="1" maxlength="30" size="10" {% if request.GET.search %}value="{{ request.GET.search }}"{% endif %}>
 
     <input type="submit" /> 
   </form>  

@@ -20,6 +20,7 @@ class AS91578(Assesment):
 class Q_1(QAA):
     ASSESMENT = AS91578
 
+    HEAD_TEMPLATE: str = "SRS/questions/SomeQuestion_head.html"
     MODEL_ANSWER_TEMPLATE: str = "SRS/questions/SomeQuestion_ma.html"
     QUESTION_TEMPLATE: str = "SRS/questions/SomeQuestion_q.html"
 

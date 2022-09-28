@@ -8,6 +8,7 @@ from typing import Optional
 from typing import Type
 from xmlrpc.client import _datetime_type
 
+import SRS.models as m
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -75,10 +76,19 @@ class ListAssesmentsView(View):
             return render(request, "SRS/assesments.html", context={"params": params})
         page_n = int(request.GET["page"])
 
+        MAX = 30
+
+        term = request.GET.get("search", None)
         filtered = []
-        for i in Assesment.ALL:
-            if i.LEVEL == level:
-                filtered.append(i)
+
+        if term:
+            for assesment, score in m.assesment_table.search._search_term(term, limit=MAX):
+                filtered.append(assesment)
+        else:
+            for i, assesment in enumerate(m.assesment_table):
+                if i > 30:
+                    break
+                filtered.append(assesment)
 
         paginator = Paginator(filtered, per_page=3)
         assesments = paginator.page(page_n)
@@ -131,7 +141,7 @@ class AnswerView(View):
             question = get_question(request, standard)
         except NoAvailableQuestion:
             return HttpResponseGone()
-        return HttpResponse(question.render(model_answer=True))
+        return HttpResponse(question.render(as_answer=True))
 
 
 class MarkView(View):

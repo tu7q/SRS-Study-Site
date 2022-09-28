@@ -6,10 +6,12 @@
 
 {% block head %}
     <link rel="stylesheet" href="{% static 'css/star-rating.css' %}">
+
+    {% include question with as_head=True only %}
 {% endblock %}
 
 {% block content %}
-    {% include question %}
+    {% include question with as_question=True only %}
     <div>
         <!-- <button hx-get="{% absurl 'AnswerView' standard=standard %}" hx-trigger="click once" hx-target="closest div"> -->
         <button hx-get="{% url 'AnswerView' standard=standard %}" hx-trigger="click once" hx-target="closest div">
