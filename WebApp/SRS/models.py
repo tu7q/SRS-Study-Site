@@ -36,6 +36,7 @@ class Assesment(PolymorphicModel):
     LEVEL: int = None
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+    last_accessed = models.DateTimeField(default=datetime.datetime.now, null=True)
     avg_score = models.FloatField()
 
     ALL = []
@@ -64,6 +65,11 @@ class Assesment(PolymorphicModel):
         cls.FROM_STANDARDS[cls.STANDARD] = len(cls.ALL) - 1  # last idx of assesments list
 
         return super().__init_subclass__()
+
+    # def add_score(self, next_score):
+    #     self.avg_score = ((self.avg_score * self.attempts) + next_score) / (self.attempts + 1)
+    #     self.attempts += 1
+    #     self.save()
 
     def save(self, *args, **kwargs):
         if not isinstance(self.avg_score, numbers.Number):
@@ -134,6 +140,8 @@ class QAA(PolymorphicModel):
 
         self.last_score = score
         self.forbidden_until = datetime.datetime.now() + lockout_duration(score)
+
+        # self.assesment.add_score(score)
 
     HEAD_TEMPLATE: str = None
     MODEL_ANSWER_TEMPLATE: str = None

@@ -1,31 +1,39 @@
 {% extends 'SRS/base.html' %}
 {% load SRS_tags %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/assesment.css' %}">
+{% endblock %}
 
 {% block content %}
 
 <!-- Search -->
 <form action="{{ request.path }}" method="GET">
-    <!-- <input type="hidden" name="page" value="1" /> -->
-
-    <!-- <div>
-        <input type="radio" id="levelChoice1"
-         name="level" value="1">
-        <label for="levelChoice1">Level 1</label>
-  
-        <input type="radio" id="levelChoice2"
-         name="level" value="2">
-        <label for="levelChoice2">Level 2</label>
-  
-        <input type="radio" id="levelChoice3"
-         name="level" value="3">
-        <label for="levelChoice3">Level 3</label>
-      </div>
-     -->
-    <input type="text" id="search" name="search" required 
+    <input type="text" id="search" name="search" placeholder="Search.."
         minlength="1" maxlength="30" size="10" {% if request.GET.search %}value="{{ request.GET.search }}"{% endif %}>
+    <button type="submit"><span class="icon" id="search-icon"></span></button> 
+</form>  
 
-    <input type="submit" /> 
-  </form>  
+<!-- topbar -->
+{% if recent_assesments %}
+<span class="centered" style="margin-bottom: 10px; margin-top: 10px;">Recent Assesments</span>
+{% endif %}
+<div class="topbar">
+    {# Note: slice:":10" is a redundancy to ensure multiple things are not evaluated all at once #}
+    {% for assesment in recent_assesments|slice:":10" %}
+        <div>
+            <article class="w3-container w3-white w3-hover-grey" style="position:relative; margin-left:16px; margin-right:16px;">
+                <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" style="position:absolute;width:100%;height:100%;top:0;left:0;text-decoration:none;z-index:10;background-color:#FFF;opacity:0;filter:alpha(opacity=1);"></a>
+                <p><b>{{ assesment.NAME }}</b></p>
+                <p>standard-{{ assesment.STANDARD }}</p>
+                <p>level-{{ assesment.LEVEL }}</p>
+            </article>
+        </div>
+    {% endfor %}
+</div>
+
+<span class="centered" style="margin-bottom: 10px; margin-top: 10px;">Search Results</span>
 
 <!-- <div hx-get="{# request.full_path #}?page=1" hx-trigger="load" id="assesment-target" hx-swap="afterend"></div> -->
 <div hx-get="{{ request.path }}?page=1&{{ params.urlencode }}" hx-trigger="load" hx-swap="outerHTML"></div>

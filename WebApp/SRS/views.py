@@ -1,12 +1,9 @@
 import datetime
-from msilib.schema import ListView
-from tkinter import CURRENT
 from types import NoneType
 from typing import Any
 from typing import List
 from typing import Optional
 from typing import Type
-from xmlrpc.client import _datetime_type
 
 import SRS.models as m
 from django.conf import settings
@@ -48,7 +45,9 @@ def get_question(request, standard):  # this is the first time the user is acces
     # note replace this with signals (because they're cleaner)
     a_model = get_assesment(standard)
     a_instance, _ = a_model.objects.get_or_create(user=request.user)
+    a_instance.last_accessed = datetime.datetime.now()
     question = a_instance.questions.earliest("forbidden_until")
+    a_instance.save()
     if question.forbidden_until > datetime.datetime.now():
         raise NoAvailableQuestion()
     return question
@@ -73,7 +72,9 @@ class ListAssesmentsView(View):
         params.pop("page", None)  # just remove it.
 
         if not "page" in request.GET:
-            return render(request, "SRS/assesments.html", context={"params": params})
+            latest = list(Assesment.objects.filter(user=request.user).order_by("-last_accessed")[:3])
+            print(latest)
+            return render(request, "SRS/assesments.html", context={"recent_assesments": latest, "params": params})
         page_n = int(request.GET["page"])
 
         MAX = 30

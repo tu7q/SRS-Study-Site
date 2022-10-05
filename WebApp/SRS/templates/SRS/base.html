@@ -24,24 +24,26 @@
           <span class="w3-button w3-hide-large w3-xxlarge w3-hover-text-grey" onclick="w3_open()"><i class="fa fa-bars"></i></span>
           <div class="w3-container">
               <!--<h1><b>My Portfolio</b></h1>-->
-              <div class="w3-section w3-padding-16" style="float: right;">
+              <!-- <div class="w3-section w3-padding-16" style="float: right;">
                       {% if user.name %}
                           <p class="w3-text-grey">{{ user.name }}</p>
                       {% else %}
                           <p class="w3-text-grey">{{ user.email }}</p>
                       {% endif %}
-              </div>
-              <div class="w3-section w3-bottombar w3-padding-16">
-                  <span class="w3-margin-right">Filter:</span> 
-                  <button class="w3-button w3-black">ALL</button>
-                  <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Design</button>
-                  <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Photos</button>
-                  <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Art</button>
-              </div>
-          </div>
-        </header>  
-
-        {% block content %}{% endblock %}
+              </div> -->
+            <div class="w3-section w3-padding-16" style="float: right;">
+                    <a href="{% url 'Logout' %}">Logout</a>      
+            </div>
+            <div class="w3-section w3-bottombar w3-padding-16">
+                {% if user.name %}
+                <span class="w3-text-grey">{{ user.name }}</span>
+                {% else %}
+                <span class="w3-text-grey">{{ user.email }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </header>  
+    {% block content %}{% endblock %}
     <!-- End page content -->
     </div>
 

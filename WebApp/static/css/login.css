@@ -1,0 +1,64 @@
+#msft-icon {
+    background: url("/static/images/microsoft-logo.svg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    vertical-align: -5px;
+}
+
+span.icon {
+    display: inline-block;
+    border-radius: 1px;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
+span.label {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: bold;
+    color: #505f79;
+    padding: 3px;
+    height: 32px;
+    line-height: 32px;
+}
+
+::selection {
+    background: hsl(202,92%,85%);
+    text-shadow: none;
+}
+
+.oauth-button {
+    background: #fff;
+    color: rgba(0,0,0,0.54);
+    box-shadow: rgba(0,0,0,0.2) 1px 1px 5px 0;
+    border-color: transparent;
+    text-align: center;
+    border-radius: 3px;
+    width: 99%;
+    height: 39px;
+    padding-top: 0;
+    margin-bottom: 12px;
+    -webkit-transition: background-color .2s ease-in-out 0s,border-color .2s ease-in-out 0s;
+    transition: background-color .2s ease-in-out 0s,border-color .2s ease-in-out 0s;
+}
+
+html, body {
+    height: 100%;
+}
+body {
+    margin: 0;
+}
+
+.flex-container {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
