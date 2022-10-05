@@ -1,4 +1,6 @@
 import datetime
+import re
+from contextlib import suppress
 from types import NoneType
 from typing import Any
 from typing import List
@@ -15,6 +17,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseGone
 from django.http import JsonResponse
+from django.http import QueryDict
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -60,39 +63,37 @@ def HXRedirect(url_name, **kwargs):
 
 
 class ListAssesmentsView(View):
+    PER_PAGE = 3
+    MAX_QUERY_SIZE = 30
+
     @method_decorator(login_required)
     def get(self, request: HttpRequest):
-        # if 'results' in request.GET and request.GET['results']:
+        # Get GET paremeters
+        params = QueryDict("", mutable=True)
+        with suppress(KeyError, ValueError):
+            params["page"] = int(request.GET["page"])
+        with suppress(KeyError):
+            search = request.GET["search"]
+            if re.fullmatch("^[a-zA-Z0-9_]*$", search):  # if query is alphanumeric
+                params["search"] = search
 
-        level = request.GET.get("level")
-        if level:
-            level = int(level)
+        if "page" not in params:
+            # No page number. So display base page.
+            # get extra context variables.
+            recent = Assesment.objects.filter(user=request.user).order_by("-last_accessed")[:3]  # no list
+            return render(request, "SRS/assesments.html", context={"recent_assesments": recent, "params": params})
 
-        params = request.GET.copy()
-        params.pop("page", None)  # just remove it.
+        # otherwise: display search results.
 
-        if not "page" in request.GET:
-            latest = list(Assesment.objects.filter(user=request.user).order_by("-last_accessed")[:3])
-            print(latest)
-            return render(request, "SRS/assesments.html", context={"recent_assesments": latest, "params": params})
-        page_n = int(request.GET["page"])
-
-        MAX = 30
-
-        term = request.GET.get("search", None)
-        filtered = []
-
-        if term:
-            for assesment, score in m.assesment_table.search._search_term(term, limit=MAX):
-                filtered.append(assesment)
+        if params["search"]:
+            filtered = [
+                a for a, _ in m.assesment_table.search._search_term(params["search"], limit=self.MAX_QUERY_SIZE)
+            ]
         else:
-            for i, assesment in enumerate(m.assesment_table):
-                if i > 30:
-                    break
-                filtered.append(assesment)
+            filtered = m.assesment_table
 
-        paginator = Paginator(filtered, per_page=3)
-        assesments = paginator.page(page_n)
+        paginator = Paginator(filtered, per_page=self.PER_PAGE)
+        assesments = paginator.page(params["page"])
 
         return render(
             request,
@@ -118,19 +119,6 @@ class QuestionView(View):
             "SRS/question.html",
             context={"question": question, "standard": standard},  # ,
         )
-
-    # def put(self, request: HttpRequest, standard: int = None) -> HttpResponse:
-    #     # does this even get called? Can't remember.
-    #     if not valid_standard(standard):
-    #         raise Http404()
-    #     try:
-    #         q = get_question(request, standard)
-    #     except NoAvailableQuestion:
-    #         a_model = get_assesment(standard)
-    #         a_instance, created = a_model.objects.get_or_create(user=request.user)
-    #         question = a_instance.questions.earliest("forbidden_until")
-    #         return render(request, "SRS/no_question.html", context={'next_question': question})
-    #     return HttpResponse("<p>This is a response</p>")
 
 
 class AnswerView(View):

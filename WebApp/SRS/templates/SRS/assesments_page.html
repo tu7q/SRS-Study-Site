@@ -16,7 +16,7 @@
 {% endfor %}
 
 {% if assesments.has_next %}
-<div hx-get="{{ request.path }}?page={{ assesments.next_page_number }}&{{ params.urlencode }}"
+<div hx-get="{{ request.path }}?page={{ assesments.next_page_number|urlencode }}&search={{ params.search|urlencode }}"
     hx-trigger="load" 
     hx-swap="outerHTML"></div>
 {% endif %}

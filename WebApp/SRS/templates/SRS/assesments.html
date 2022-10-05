@@ -36,7 +36,7 @@
 <span class="centered" style="margin-bottom: 10px; margin-top: 10px;">Search Results</span>
 
 <!-- <div hx-get="{# request.full_path #}?page=1" hx-trigger="load" id="assesment-target" hx-swap="afterend"></div> -->
-<div hx-get="{{ request.path }}?page=1&{{ params.urlencode }}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div hx-get="{{ request.path }}?page=1&search={{ params.search|urlencode }}" hx-trigger="load" hx-swap="outerHTML"></div>
 
 <script>
 // Script to open and close sidebar
