@@ -1,7 +1,3 @@
-from django.http import JsonResponse
-from django.template.loader import get_template
-from django_components.component import registry
-
 from ..models import Assesment
 from ..models import ASType
 from ..models import QAA

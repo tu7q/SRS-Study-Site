@@ -2,7 +2,8 @@
 Website to study school subjects
 
 scp -r /publish-location/* username@hostname:/home/pi/deployment-location
-
+pi@raspberrypi
+raspberrypy will resolve to correct local address.
 
 # remember to clear sessions once per day at midnight using cron jobs
 -> Nope not anymore

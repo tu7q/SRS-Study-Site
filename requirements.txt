@@ -1,10 +1,9 @@
+# python 3.10.2
+
 Django==4.0.6
 msal==1.18.0
-celery==5.2.7
-redis==4.3.4 # celery broker
 django-polymorphic==3.1.0
 django-htmx==1.12.2
 littletable==2.0.7
-
-pre-commit==2.20.0
-black==22.6.0
+django-csp==3.7
+get-docker-secret==1.0.2 # for docker deployment

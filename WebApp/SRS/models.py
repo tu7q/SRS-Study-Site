@@ -4,10 +4,8 @@ import datetime
 import logging
 import numbers
 import time
-from dataclasses import dataclass
 from enum import auto
 from enum import Enum
-from tkinter.messagebox import RETRY
 from typing import Type
 
 from django.core.validators import MaxValueValidator
@@ -163,8 +161,6 @@ class QAA(PolymorphicModel):
 
         if [as_head, as_question, as_answer].count(True) > 1:
             raise Exception("Only head, question_content or model_answer can't be used simultaneously")
-
-        print(f"render(context={context}, as_head={as_head}, content={as_question}, answer={as_answer}")
 
         template = None
         context = {}

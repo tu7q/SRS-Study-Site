@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include
+from django.urls import path
 
 
 urlpatterns = [
@@ -22,3 +23,10 @@ urlpatterns = [
     path("", include("SRS.urls")),
     path("admin/", admin.site.urls),
 ]
+
+import os
+
+if os.getenv("DJANGO_DEVELOPMENT") == "true":
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
+    urlpatterns += staticfiles_urlpatterns()

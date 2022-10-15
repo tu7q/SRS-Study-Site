@@ -9,22 +9,28 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import logging
+import os
+import sys
 from pathlib import Path
+
+import csp
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ddqkq#fk0guos@fofiw@x!35q(pmur7c0uy^rijsjh2me$q&a*"
+if "collectstatic" in sys.argv:
+    from .settings_dev import *
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+    DEBUG = False
+elif os.getenv("DJANGO_DEVELOPMENT") == "true":
+    logging.warning("running django application in development")
+    from .settings_dev import *
+else:
+    from .settings_prod import *
 
 LOGIN_URL = "Login"
 LOGIN_REDIRECT_URL = "Index"
@@ -55,7 +61,19 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    "csp.middleware.CSPMiddleware",
 ]
+
+CSP_DEFAULT_SRC = ("'self'", "https://ncea-srs.duckdns.org")
+CSP_NAVIGATE_TO = ("'self'", "https://ncea-srs.duckdns.org", "https://login.microsoftonline.com")
+CSP_STYLE_SRC_ELEM = (
+    "'self'",
+    "https://ncea-srs.duckdns.org",
+    "https://www.w3schools.com",
+    "https://fonts.googleapis.com",
+    "https://cdnjs.cloudflare.com",
+)
+CSP_FONT_SRC = ("https://cdnjs.cloudflare.com", "https://fonts.gstatic.com")
 
 AUTHENTICATION_BACKENDS = ["MicrosoftAuth.backends.MicrosoftAuthentication"]
 
@@ -79,17 +97,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "WebApp.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -109,7 +118,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -121,12 +129,12 @@ USE_I18N = True
 
 USE_TZ = False  # Time isn't super important for this website, only lengths are.
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -136,18 +144,20 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 from celery.schedules import crontab
 
 # Celery Config Options
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
+CELERY_BROKER_URL = "redis://celery_broker:6379/0"
+CELERY_RESULT_BACKEND = "redis://celery_broker:6379/1"
 # probably works.
 CELERY_BEAT_SCHEDULE = {
     "clear-session-midnight-daily": {
         "task": "WebApp.celery.session_cleanup",
-        "schedule": crontab(minute=0, hour=0),  # daily at midnight
+        "schedule": crontab(
+            minute=0, hour=0, day_of_month="*", month_of_year="*", day_of_week="*"
+        ),  # daily at midnight
         "options": {"expires": 15.0},  # if task fails to start in 15 seconds it won't run at all
     }
 }
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASL_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60

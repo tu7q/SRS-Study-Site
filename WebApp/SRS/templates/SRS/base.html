@@ -10,40 +10,30 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <style>
-        body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
-    </style>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block head %}{% endblock %}
 </head>
 
-<body class="w3-light-grey w3-content" style="max-width:1600px; display: flex; flex-direction:column; min-height:100vh;">
-    <div class="w3-main" style="flex: 1">
+<!-- <body class="w3-light-grey w3-content"> -->
+<body class="w3-light-grey">
+    <div class="w3-main flex">
         <!-- Header -->
         <header id="portfolio">
-          <!-- <a href="#"><img src="/w3images/avatar_g2.jpg" style="width:65px;" class="w3-circle w3-right w3-margin w3-hide-large w3-hover-opacity"></a> -->
-          <span class="w3-button w3-hide-large w3-xxlarge w3-hover-text-grey" onclick="w3_open()"><i class="fa fa-bars"></i></span>
-          <div class="w3-container">
-              <!--<h1><b>My Portfolio</b></h1>-->
-              <!-- <div class="w3-section w3-padding-16" style="float: right;">
-                      {% if user.name %}
-                          <p class="w3-text-grey">{{ user.name }}</p>
-                      {% else %}
-                          <p class="w3-text-grey">{{ user.email }}</p>
-                      {% endif %}
-              </div> -->
-            <div class="w3-section w3-padding-16" style="float: right;">
+            <!-- <a href="#"><img src="/w3images/avatar_g2.jpg" style="width:65px;" class="w3-circle w3-right w3-margin w3-hide-large w3-hover-opacity"></a> -->
+            <div class="w3-container">
+                <div class="w3-section w3-padding-16 right-float">
                     <a href="{% url 'Logout' %}">Logout</a>      
+                </div>
+                <div class="w3-section w3-bottombar w3-padding-16">
+                    {% if user.name %}
+                    <span class="w3-text-grey">{{ user.name }}</span>
+                    {% else %}
+                    <span class="w3-text-grey">{{ user.email }}</span>
+                    {% endif %}
+                </div>
             </div>
-            <div class="w3-section w3-bottombar w3-padding-16">
-                {% if user.name %}
-                <span class="w3-text-grey">{{ user.name }}</span>
-                {% else %}
-                <span class="w3-text-grey">{{ user.email }}</span>
-                {% endif %}
-            </div>
-        </div>
-    </header>  
-    {% block content %}{% endblock %}
+        </header>  
+        {% block content %}{% endblock %}
     <!-- End page content -->
     </div>
 

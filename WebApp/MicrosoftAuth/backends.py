@@ -1,21 +1,24 @@
-from typing import Any, Optional
-from django.contrib.auth.backends import BaseBackend
-from django.contrib.auth import get_user_model
-from django.http import HttpRequest
+from typing import Any
+from typing import Optional
+
 import msal
 import requests
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import BaseBackend
+from django.http import HttpRequest
+from get_docker_secret import get_docker_secret
+
 
 UserModel = get_user_model()
 
 # ms app settings
-HOST = "http://localhost:8000"
+HOST = "https://ncea-srs.duckdns.org"
 
-APP_ID = "6db743c4-b783-4604-9808-799282822dcb"
-APP_SECRET = "lST8Q~HZYeHUzm2b9JZ~1AsyHS9avPpkwSnSUaHU"
-REDIRECT = HOST + "/auth/callback"
+APP_ID = get_docker_secret("ms_app_id")
+APP_SECRET = get_docker_secret("ms_secret")
+REDIRECT = HOST + "/auth/callback/"
 SCOPES = ["https://graph.microsoft.com/user.read"]
 AUTHORITY = "https://login.microsoftonline.com/organizations"
-VALID_EMAIL_DOMAINS = "bayfield-high.school.nz"
 
 LOGOUT_URL = AUTHORITY + "/oauth2/v2.0/logout"  # should this be URI?
 
@@ -29,7 +32,7 @@ class MicrosoftAuthentication(BaseBackend):
 
     def setup(self, request) -> str:
         app = self._get_confidential_app()
-        flow = app.initiate_auth_code_flow(SCOPES, max_age=10 * 60)
+        flow = app.initiate_auth_code_flow(SCOPES, max_age=10 * 60, redirect_uri=REDIRECT)
         self.to_store(request, flow)
         return flow["auth_uri"]
 

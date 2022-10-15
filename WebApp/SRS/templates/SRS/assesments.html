@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'css/assesment.css' %}">
+    <link rel="stylesheet" href="{% static 'css/assesments.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -17,14 +17,14 @@
 
 <!-- topbar -->
 {% if recent_assesments %}
-<span class="centered" style="margin-bottom: 10px; margin-top: 10px;">Recent Assesments</span>
+<span class="centered margin-vertical">Recent Assesments</span>
 {% endif %}
 <div class="topbar">
     {# Note: slice:":10" is a redundancy to ensure multiple things are not evaluated all at once #}
     {% for assesment in recent_assesments|slice:":10" %}
         <div>
-            <article class="w3-container w3-white w3-hover-grey" style="position:relative; margin-left:16px; margin-right:16px;">
-                <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" style="position:absolute;width:100%;height:100%;top:0;left:0;text-decoration:none;z-index:10;background-color:#FFF;opacity:0;filter:alpha(opacity=1);"></a>
+            <article class="w3-container w3-white w3-hover-grey linked-div margin-horizontal">
+                <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" class="linked-div-a"></a>
                 <p><b>{{ assesment.NAME }}</b></p>
                 <p>standard-{{ assesment.STANDARD }}</p>
                 <p>level-{{ assesment.LEVEL }}</p>
@@ -33,21 +33,8 @@
     {% endfor %}
 </div>
 
-<span class="centered" style="margin-bottom: 10px; margin-top: 10px;">Search Results</span>
+<span class="centered margin-vertical">Search Results</span>
 
 <!-- <div hx-get="{# request.full_path #}?page=1" hx-trigger="load" id="assesment-target" hx-swap="afterend"></div> -->
 <div hx-get="{{ request.path }}?page=1&search={{ params.search|urlencode }}" hx-trigger="load" hx-swap="outerHTML"></div>
-
-<script>
-// Script to open and close sidebar
-function w3_open() {
-    document.getElementById("mySidebar").style.display = "block";
-    document.getElementById("myOverlay").style.display = "block";
-}
- 
-function w3_close() {
-    document.getElementById("mySidebar").style.display = "none";
-    document.getElementById("myOverlay").style.display = "none";
-}
-</script>
 {% endblock %}
