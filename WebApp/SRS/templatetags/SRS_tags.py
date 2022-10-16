@@ -27,6 +27,18 @@ def chunks(value, chunk_length):
             break
 
 
+@register.filter
+def latexnotation(value, digits):
+    """
+    Turn value into scientific notation
+    """
+    l = f"{{:.{digits}e}}".format(value).split("e")
+    val, exp = l[0], l[1]
+    exp = exp.replace("+", "")  # remove + sign
+    exp = exp.lstrip("0")  # strip leading 0s
+    return f"{val}*10^{{{exp}}}"
+
+
 # @register.simple_tag(takes_context=True)
 # def assesment_GET_params(context, next_page):
 #     request = context['request']

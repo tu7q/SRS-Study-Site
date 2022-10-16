@@ -1,8 +1,7 @@
 {% extends 'SRS/base.html' %}
 
 {% block content %}
-    <p>There is no question. Next question:</p>
-    <p>{{ next_question.forbidden_until|timeuntil }}</p>
-    <!-- {{ next_quesiton.forbidden_until|timesince }} -->
-    <a href="{% url 'Index' %}">Back to Assesments</a>
+<div style="text-align:center; width: 100%;">
+    <p>There are no currently available questions. The next question is in {{ next_question.forbidden_until|timeuntil }}.</p>
+</div>
 {% endblock %}

@@ -4,8 +4,8 @@
 <div class=""w3-row-padding>
 {% for assesment in chunk %}
     <article class="w3-third w3-container w3-margin-bottom">
-        <div class="w3-container w3-white w3-hover-grey" style="position:relative; text-align: center;">
-            <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" class="" style="position:absolute;width:100%;height:100%;top:0;left:0;text-decoration:none;z-index:10;background-color:#FFF;opacity:0;filter:alpha(opacity=1);"></a>
+        <div class="w3-container w3-white w3-hover-grey linked-div center-text">
+            <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" class="linked-div-a"></a>
             <p><b>{{ assesment.NAME }}</b></p>
             <p>standard-{{ assesment.STANDARD }}</p>
             <p>level-{{ assesment.LEVEL }}</p>
@@ -16,7 +16,7 @@
 {% endfor %}
 
 {% if assesments.has_next %}
-<div hx-get="{{ request.path }}?page={{ assesments.next_page_number }}&{{ params.urlencode }}"
+<div hx-get="{{ request.path }}?page={{ assesments.next_page_number|urlencode }}&search={{ params.search|urlencode }}"
     hx-trigger="load" 
     hx-swap="outerHTML"></div>
 {% endif %}

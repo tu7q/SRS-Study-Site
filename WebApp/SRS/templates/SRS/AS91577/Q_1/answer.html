@@ -1,0 +1,19 @@
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    \frac{ {{ a }}\sqrt{ {{ b }} } }{ \sqrt{ {{ c }} } } = \frac{ {{ a }}\sqrt{ {{b}} } }{ \sqrt{ {{ c }} } } * \frac{\sqrt {{c}} }{\sqrt {{c}} }
+</math-field>
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    =\frac{ {{ a }}\sqrt{ {{ b }} * {{ c }} } }{ {{ c }} }
+</math-field>
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    =\frac{ {{ a }}\sqrt{ {{ bc }} } }{ {{ c }} }
+</math-field>
+{% if simple_top %}
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    =\frac{ {{ top }} }{ {{ c }} }
+</math-field>
+{% endif %}
+{% if simple %}
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    ={{ val }}
+</math-field>
+{% endif %}

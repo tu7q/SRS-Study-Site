@@ -162,4 +162,3 @@ services/djangoapp/ms_app_id.txt
 services/djangoapp/ms_secret.txt
 services/djangoapp/secret_key.txt
 services/duckdns/duckdns_token.txt
-services/djangoapp/ms_app_id.txt

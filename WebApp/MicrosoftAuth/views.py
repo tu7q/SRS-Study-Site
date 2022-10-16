@@ -1,13 +1,19 @@
-from django.shortcuts import render, redirect
+import logging
 
-from .authentication import authenticate, BACKEND, BACKEND_PATH
-from django.contrib.auth import login, logout
 from django.conf import settings
+from django.contrib.auth import login
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+from django.shortcuts import render
+
+from .authentication import authenticate
+from .authentication import BACKEND
+from .authentication import BACKEND_PATH
 
 
 def Login(request):
     auth_uri = BACKEND.setup(request)
-    return render(request, "login.html", context={"auth_uri": auth_uri})
+    return render(request, "MicrosoftAuth/login.html", context={"auth_uri": auth_uri})
 
 
 def Callback(request):

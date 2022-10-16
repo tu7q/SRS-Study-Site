@@ -1,0 +1,124 @@
+version: "3.8"
+
+secrets:
+  secret_key:
+    file: ./services/djangoapp/secret_key.txt
+  ms_app_id:
+    file: ./services/djangoapp/ms_app_id.txt
+  ms_secret:
+    file: ./services/djangoapp/ms_secret.txt
+  duckdns_token:
+    file: ./services/duckdns/duckdns_token.txt
+
+volumes:
+  db:
+  static:
+  nginx_secrets:
+  redis:
+
+services:
+  db:
+    image: arm64v8/postgres:alpine
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/postgresql/data
+    env_file:
+      - ./services/postgres/.env
+    container_name: postgres
+
+  djangoapp:
+    build:
+      context: .
+      dockerfile: ./services/djangoapp/Dockerfile
+    env_file:
+      - ./services/djangoapp/.env
+    restart: unless-stopped
+    container_name: djangoapp
+    secrets:
+      - secret_key
+      - ms_app_id
+      - ms_secret
+    volumes:
+      - static:/opt/app/web/staticfiles
+      - ./WebApp:/opt/app/web
+    command: ./entrypoint.sh
+    # Note: docker exec -it djangoapp python3 manage.py migrate
+    depends_on:
+      - db
+      # - celery
+      # - celery_beat
+  
+  nginx:
+    image: jonasal/nginx-certbot:latest
+    container_name: nginx
+    restart: unless-stopped
+    env_file:
+      - ./services/certbot/.env
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - nginx_secrets:/etc/letsencrypt
+      # the image will extract the correct commands to run from the config file.
+      - ./services/nginx/conf:/etc/nginx/user_conf.d:ro;
+      - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf:ro;
+      - static:/opt/app/web/staticfiles
+
+    depends_on:
+      - djangoapp
+
+  duckdns:
+    image: linuxserver/duckdns:arm64v8-latest
+    container_name: duckdns
+    restart: unless-stopped
+    env_file:
+      - ./services/duckdns/.env
+    volumes:
+      - /home/pi/duckdns/config:/config
+    secrets:
+      - duckdns_token
+ 
+  celery_broker:
+    build:
+      context: .
+      dockerfile: ./services/celery_broker/Dockerfile
+    container_name: redis
+    restart: unless-stopped
+    command: ./entrypoint.sh
+    volumes:
+      #- ./services/celery_broker/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis:/data
+
+  celery:
+    build:
+      context: .
+      dockerfile: ./services/celery/Dockerfile
+    container_name: celery
+    command: ./entrypoint.sh
+    depends_on:
+      - celery_broker
+    volumes:
+      - ./WebApp:/opt/app/web
+    secrets:
+      - secret_key
+      - ms_app_id
+      - ms_secret
+    env_file:
+      - ./services/djangoapp/.env
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./services/celery_beat/Dockerfile
+    container_name: celery-beat
+    command: ./entrypoint.sh
+    depends_on:
+      - celery_broker
+    volumes:
+      - ./WebApp:/opt/app/web
+    secrets:
+      - secret_key
+      - ms_app_id
+      - ms_secret
+    env_file:
+      - ./services/djangoapp/.env
