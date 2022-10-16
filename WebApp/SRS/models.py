@@ -6,11 +6,14 @@ import numbers
 import time
 from enum import auto
 from enum import Enum
+from re import T
 from typing import Type
 
 from django.core.validators import MaxValueValidator
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.template.exceptions import TemplateDoesNotExist
+from django.template.exceptions import TemplateSyntaxError
 from django.template.loader import render_to_string
 from MicrosoftAuth.models import User
 from polymorphic.models import PolymorphicModel
@@ -145,42 +148,42 @@ class QAA(PolymorphicModel):
     MODEL_ANSWER_TEMPLATE: str = None
     QUESTION_TEMPLATE: str = None
 
-    def head_context(self):
-        return {}
-
-    def question_context(self):
-        return {}
-
-    def answer_context(self):
+    def context(self):
         return {}
 
     def render(self, context={}, as_head=False, as_question: bool = False, as_answer: bool = False) -> str:
+        request = context.get("request", None)  # important
+
         as_head = context.get("as_head", False) or as_head
         as_question = context.get("as_question", False) or as_question
         as_answer = context.get("as_answer", False) or as_answer
 
         if [as_head, as_question, as_answer].count(True) > 1:
             raise Exception("Only head, question_content or model_answer can't be used simultaneously")
+        elif [as_head, as_question, as_answer].count(True) == 0:
+            raise Exception("as_head or as_question or as_answer not provided to assesment render.")
 
         template = None
-        context = {}
-
         if as_head:
-            context = self.head_context()
             template = self.HEAD_TEMPLATE
-
         if as_question:
-            context = self.question_context()
             template = self.QUESTION_TEMPLATE
-
         if as_answer:
-            context = self.answer_context()
             template = self.MODEL_ANSWER_TEMPLATE
-
         if template is None:
             return ""
 
-        return render_to_string(template, context, None, None)
+        context = self.context()
+        context["request"] = request
+
+        try:
+            return render_to_string(template, context, None, None)
+        except TemplateDoesNotExist as e:
+            logging.warning(f"Template: {template} does not exist and could not rendered")
+            raise RuntimeError(f"Template: {template} does not exist and could not rendered") from e
+        except TemplateSyntaxError as e:
+            logging.warning(f"Assesment Template: {template} failed to render with context: {context}")
+            raise RuntimeError(f"Assesment Template: {template} failed to render with context: {context}") from e
 
 
 from . import assesments

@@ -1,4 +1,5 @@
 import datetime
+import logging
 import re
 from contextlib import suppress
 from types import NoneType
@@ -57,7 +58,8 @@ def get_question(request, standard):  # this is the first time the user is acces
 
 
 def HXRedirect(url_name, **kwargs):
-    response = redirect(url_name, **kwargs)
+    response = HttpResponse()
+    # response = redirect(url_name, **kwargs)
     response["HX-Redirect"] = reverse(url_name, kwargs=kwargs)
     return response
 

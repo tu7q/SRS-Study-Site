@@ -64,16 +64,24 @@ MIDDLEWARE = [
     "csp.middleware.CSPMiddleware",
 ]
 
-CSP_DEFAULT_SRC = ("'self'", "https://ncea-srs.duckdns.org")
-CSP_NAVIGATE_TO = ("'self'", "https://ncea-srs.duckdns.org", "https://login.microsoftonline.com")
+CSP_DEFAULT_SRC = ("'self'", "'unsafe-inline'")  # unsafe-inline is insecure (but angular requires it so...)
+CSP_NAVIGATE_TO = ("'self'", "https://login.microsoftonline.com")
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_SCRIPT_SRC_ELEM = ("'self'", "https://unpkg.com")
+# CSP_INCLUDE_NONCE_IN = [
+#     'script-src',
+#     'script-src-elem'
+# ]
 CSP_STYLE_SRC_ELEM = (
     "'self'",
-    "https://ncea-srs.duckdns.org",
     "https://www.w3schools.com",
     "https://fonts.googleapis.com",
     "https://cdnjs.cloudflare.com",
+    "'unsafe-inline'",
 )
-CSP_FONT_SRC = ("https://cdnjs.cloudflare.com", "https://fonts.gstatic.com")
+CSP_FONT_SRC = ("https://cdnjs.cloudflare.com", "https://fonts.gstatic.com", "https://unpkg.com")
+CSP_CONNECT_SRC = ("'self'", "https://unpkg.com")
+CSP_MEDIA_SRC = "https://unpkg.com"
 
 AUTHENTICATION_BACKENDS = ["MicrosoftAuth.backends.MicrosoftAuthentication"]
 

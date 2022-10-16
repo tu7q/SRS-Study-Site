@@ -8,7 +8,7 @@ SECRET_KEY = get_docker_secret("secret_key")
 if SECRET_KEY is None:
     raise RuntimeError("could not obtain the secret_key")
 
-ALLOWED_HOSTS = ["ncea-srs.duckdns.org", "0.0.0.0", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["ncea-srs.duckdns.org", "0.0.0.0", "localhost", "127.0.0.1", "raspberrypi"]
 
 # GET Certificates for cookies to work again,
 SESSION_COOKIE_SECURE = True

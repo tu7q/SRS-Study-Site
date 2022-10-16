@@ -40,7 +40,7 @@ services:
       - ms_secret
     volumes:
       - static:/opt/app/web/staticfiles
-      - ./WebApp:/opt/app/web/:ro
+      - ./WebApp:/opt/app/web
     command: ./entrypoint.sh
     # Note: docker exec -it djangoapp python3 manage.py migrate
     depends_on:

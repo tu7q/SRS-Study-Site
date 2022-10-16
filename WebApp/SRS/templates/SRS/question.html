@@ -7,29 +7,34 @@
 {% block head %}
     <link rel="stylesheet" href="{% static 'css/star-rating.css' %}">
 
-    {% include question with as_head=True only %}
+    {# only not there so request can be retrieved #}
+    {% include question with as_head=True %} 
 {% endblock %}
 
 {% block content %}
-    {% include question with as_question=True only %}
-    <div>
+    {% include question with as_question=True %}
+    <div style="margin-left: auto; margin-right: auto; text-align: center;">
         <!-- <button hx-get="{% absurl 'AnswerView' standard=standard %}" hx-trigger="click once" hx-target="closest div"> -->
-        <button hx-get="{% url 'AnswerView' standard=standard %}" hx-trigger="click once" hx-target="closest div">
+        <button id="AnswerButton" hx-get="{% url 'AnswerView' standard=standard %}" hx-trigger="click once" hx-target="closest div">
             View Answer
         </button>
     </div>
-
-    <div class="rate">
-        <input type="radio" id="star5" name="rate" value="5" />
-        <label for="star5" hx-get="{% url 'MarkView' standard=standard score=5 %}" hx-trigger="click once" hx-target="body">5 stars</label>
-        <input type="radio" id="star4" name="rate" value="4" />
-        <label for="star4" hx-trigger="click once" hx-target="body" hx-get="{% url 'MarkView' standard=standard score=4 %}">4 stars</label>
-        <input type="radio" id="star3" name="rate" value="3" />
-        <label for="star3" hx-trigger="click once" hx-target="body" hx-get="{% url 'MarkView' standard=standard score=3 %}">3 stars</label>
-        <input type="radio" id="star2" name="rate" value="2" />
-        <label for="star2" hx-trigger="click once" hx-target="body" hx-get="{% url 'MarkView' standard=standard score=2 %}">2 stars</label>
-        <input type="radio" id="star1" name="rate" value="1" />
-        <label for="star1" hx-trigger="click once" hx-target="body" hx-get="{% url 'MarkView' standard=standard score=1 %}">1 star</label>
+    <br>
+    <div id="RatingSelection" style="display: none;">
+        <span style="margin-left: auto; margin-right: auto; display: block; text-align:center; padding-top: 20px; padding-bottom: 0px;">
+            Rate Your Score!
+        </span>
+        <div class="rate" style="position: relative; left: 50%; transform: translateX(-50%); margin-left: auto; margin-right: auto;">
+            <input type="radio" id="star5" name="rate" value="5" />
+            <label for="star5" hx-trigger="click once" hx-get="{% url 'MarkView' standard=standard score=5 %}">5 stars</label>
+            <input type="radio" id="star4" name="rate" value="4" />
+            <label for="star4" hx-trigger="click once" hx-get="{% url 'MarkView' standard=standard score=4 %}">4 stars</label>
+            <input type="radio" id="star3" name="rate" value="3" />
+            <label for="star3" hx-trigger="click once" hx-get="{% url 'MarkView' standard=standard score=3 %}">3 stars</label>
+            <input type="radio" id="star2" name="rate" value="2" />
+            <label for="star2" hx-trigger="click once" hx-get="{% url 'MarkView' standard=standard score=2 %}">2 stars</label>
+            <input type="radio" id="star1" name="rate" value="1" />
+            <label for="star1" hx-trigger="click once" hx-get="{% url 'MarkView' standard=standard score=1 %}">1 star</label>
+        </div>
     </div>
-
 {% endblock %}

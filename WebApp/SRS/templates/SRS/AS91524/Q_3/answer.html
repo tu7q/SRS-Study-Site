@@ -1,0 +1,24 @@
+{% load SRS_tags %}
+
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    d={{ v }} * {{ T|latexnotation:2 }}
+</math-field>
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    d={{ d|latexnotation:2 }}
+</math-field>
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    r = \frac{ {{ d|latexnotation:2 }} }{2 * pi}
+</math-field>
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    r = {{ r|latexnotation:2 }}
+</math-field>
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    M = \frac{ {{ r|latexnotation:2 }} * {{ v }}^{2} }{ {{G|latexnotation:2}} }
+</math-field>
+<math-field read-only style="display: table; margin-left: auto; margin-right: auto;">
+    M = {{ M|latexnotation:2 }}
+</math-field>
+<p>
+    The mass of the planet is {{ M|stringformat:".2e" }}kg.
+</p>
+
