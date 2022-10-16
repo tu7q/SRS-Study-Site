@@ -1,4 +1,4 @@
 # requirements for development: lint and format checks
 
-pre-commit==2.20.0
-black==22.6.0
+pre-commit>=2.20.0, <2.21.0
+black>=22.6.0, <22.7.0
