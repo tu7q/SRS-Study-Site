@@ -82,10 +82,10 @@ class Assesment(PolymorphicModel):
 
 def lockout_duration(score: int) -> datetime.timedelta:
     # the higher the score the longer the duration (so the questions with lower score get returned more often)
-    return datetime.timedelta(seconds=score) + lockout_duration.OFFSET
+    return datetime.timedelta(minutes=score * 10) + lockout_duration.OFFSET
 
 
-lockout_duration.OFFSET = datetime.timedelta(seconds=1)
+lockout_duration.OFFSET = datetime.timedelta(minutes=5)
 
 
 class QAA(PolymorphicModel):
