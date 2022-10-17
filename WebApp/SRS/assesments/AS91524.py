@@ -37,9 +37,9 @@ class Q_1(QAA):
         context = {}
 
         r = Random(self.seed)
-        context["distance"] = r.randint(1, 10)
-        context["M1"] = r.randint(1, 7)
-        context["M2"] = r.randint(1, 7)
+        context["distance"] = r.randint(2, 10)
+        context["M1"] = r.randint(2, 7)
+        context["M2"] = r.randint(2, 7)
         context["computed"] = round((context["distance"] * context["M2"]) / (context["M1"] + context["M2"]), 1)
 
         return context
@@ -142,8 +142,9 @@ class Q_4(QAA):
 
         r = Random(self.seed)
 
-        M = round(r.random() * 8, 1)  # 0 -> 8
-        radius = round(r.random() * 3, 1)  # 0 -> 3. 1dp
+        # Note: +0.1 -> non 0
+        M = round(r.random() * 8, 1) + 0.1  # 0 -> 8.
+        radius = round(r.random() * 3, 1) + 0.1  # 0 -> 3. 1dp
 
         v = math.sqrt(g * radius)
 

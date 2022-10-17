@@ -34,8 +34,13 @@ def latexnotation(value, digits):
     """
     l = f"{{:.{digits}e}}".format(value).split("e")
     val, exp = l[0], l[1]
-    exp = exp.replace("+", "")  # remove + sign
+    sign = ""
+    if exp.startswith("-"):
+        sign = "-"
+    exp = exp[1:]  # remove sign
     exp = exp.lstrip("0")  # strip leading 0s
+    # add sign
+    exp = sign + exp
     return f"{val}*10^{{{exp}}}"
 
 
