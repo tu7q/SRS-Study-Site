@@ -2,4 +2,4 @@
 
 set -e
 
-redis-server
+redis-server --appendonly yes

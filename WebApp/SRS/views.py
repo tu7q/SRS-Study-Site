@@ -76,14 +76,20 @@ class ListAssesmentsView(View):
             params["page"] = int(request.GET["page"])
         with suppress(KeyError):
             search = request.GET["search"]
-            if re.fullmatch("^[a-zA-Z0-9_]*$", search):  # if query is alphanumeric
+            # a-zA-Z0-9 matches alphanumeric characters
+            # \s matches whitespace
+            if re.fullmatch("^[a-zA-Z0-9\s]*$", search):  # if query is alphanumeric
                 params["search"] = search
 
         if "page" not in params:
             # No page number. So display base page.
             # get extra context variables.
             recent = Assesment.objects.filter(user=request.user).order_by("-last_accessed")[:3]  # no list
-            return render(request, "SRS/assesments.html", context={"recent_assesments": recent, "params": params})
+            return render(
+                request,
+                "SRS/assesments.html",
+                context={"recent_assesments": recent, "params": params},
+            )
 
         # otherwise: display search results.
 
@@ -115,7 +121,7 @@ class QuestionView(View):
             a_model = get_assesment(standard)
             a_instance, created = a_model.objects.get_or_create(user=request.user)
             question = a_instance.questions.earliest("forbidden_until")
-            return render(request, "SRS/no_question.html", context={"next_question": question})
+            return render(request, "SRS/no_question.html", context={"next_question": question, "standard": standard})
         return render(
             request,
             "SRS/question.html",
@@ -150,3 +156,9 @@ class MarkView(View):
 
         # return redirect("QuestionView", standard=standard)
         # return HttpResponse(status=204, headers={'HX-Redirect': reverse('QuestionView', kwargs={'standard': standard})})
+
+
+class FAQ(View):
+    @method_decorator(login_required)
+    def get(self, request: HttpRequest):
+        return render(request, "SRS/FAQ.html")

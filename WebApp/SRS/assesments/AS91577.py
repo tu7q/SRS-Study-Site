@@ -133,7 +133,7 @@ class Q_4(QAA):
 
 class Q_5(QAA):
     """
-    Polar Form + Argand Diagram + De Moivre's Theorem
+    De Moivre's Theorem
     """
 
     ASSESMENT = AS91577

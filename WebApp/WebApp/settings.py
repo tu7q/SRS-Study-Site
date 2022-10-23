@@ -14,8 +14,6 @@ import os
 import sys
 from pathlib import Path
 
-import csp
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +29,8 @@ elif os.getenv("DJANGO_DEVELOPMENT") == "true":
     from .settings_dev import *
 else:
     from .settings_prod import *
+
+# ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split(" ")
 
 LOGIN_URL = "Login"
 LOGIN_REDIRECT_URL = "Index"
@@ -63,6 +63,33 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
     "csp.middleware.CSPMiddleware",
 ]
+
+# def get_env(setting, env):
+#     got = os.environ.get(env)
+#     if got:
+#         globals()[setting] = tuple(got.split(" "))
+#     else:
+#         logging.warning(f"{setting} was not set!")
+
+# get_env('CSP_DEFAULT_SRC', 'CSP_DEFAULT_SRC')
+# get_env('CSP_NAVIGATE_TO', 'CSP_NAVIGATE_TO')
+# get_env("CSP_SCRIPT_SRC", "CSP_SCRIPT_SRC")
+# get_env("CSP_SCRIPT_SRC_ELEM", "CSP_SCRIPT_SRC_ELEM")
+# get_env("CSP_INCLUDE_NONCE_IN", "CSP_INCLUDE_NONCE_IN")
+# get_env("CSP_STYLE_SRC_ELEM", "CSP_STYLE_SRC_ELEM")
+# get_env("CSP_FONT_SRC", "CSP_FONT_SRC")
+# get_env("CSP_CONNECT_SRC", "CSP_CONNECT_SRC")
+# get_env("CSP_MEDIA_SRC", "CSP_MEDIA_SRC")
+
+# tuple(os.environ.get('CSP_DEFAULT_SRC', "").split(" "))
+# tuple(os.environ.get('CSP_NAVIGATE_TO', "").split(" "))
+# tuple(os.environ.get('CSP_SCRIPT_SRC', "").split(" "))
+# tuple(os.environ.get('CSP_SCRIPT_SRC_ELEM', "").split(" "))
+# tuple(os.environ.get('CSP_INCLUDE_NONCE_IN', "").split(" "))
+# tuple(os.environ.get('CSP_STYLE_SRC_ELEM', "").split(" "))
+# tuple(os.environ.get('CSP_FONT_SRC', "").split(" "))
+# tuple(os.environ.get('CSP_CONNECT_SRC', "").split(" "))
+# tuple(os.environ.get('CSP_MEDIA_SRC', "").split(" "))
 
 CSP_DEFAULT_SRC = ("'self'", "'unsafe-inline'")  # unsafe-inline is insecure (but angular requires it so...)
 CSP_NAVIGATE_TO = ("'self'", "https://login.microsoftonline.com")
@@ -152,8 +179,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 from celery.schedules import crontab
 
 # Celery Config Options
+
+# os.environ['CELERY_BROKER_URL']
+# os.environ['CELERY_RESULT_BACKEND']
+
 CELERY_BROKER_URL = "redis://celery_broker:6379/0"
 CELERY_RESULT_BACKEND = "redis://celery_broker:6379/1"
+
 # probably works.
 CELERY_BEAT_SCHEDULE = {
     "clear-session-midnight-daily": {

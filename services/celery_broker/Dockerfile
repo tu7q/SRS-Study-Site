@@ -9,5 +9,5 @@ COPY ./services/celery_broker/entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
 
 # Change to non-root privilege
-USER redis
+# USER redis
 

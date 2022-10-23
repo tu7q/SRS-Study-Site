@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>W3.CSS Template</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="text/javascript" src="{% static 'js/htmx.min.js' %}"></script>
@@ -25,6 +24,9 @@
             <a href="{% url 'Logout' %}">Logout</a>      
         </div>
         <div class="w3-section w3-padding-16 right-float" style="padding-right: 16px;">
+            <a href="{% url 'FAQ' %}">FAQ</a>      
+        </div>
+        <div class="w3-section w3-padding-16 right-float" style="padding-right: 16px;">
             <a href="{% url 'Index' %}">Home</a>      
         </div>
         <div class="w3-section w3-bottombar w3-padding-16">
@@ -44,7 +46,16 @@
 
     <!-- Footer -->
     <footer class="w3-container w3-padding-32 w3-dark-grey" style="min-height: 50px;">
-    </footer>      
+        <p style="color: white;">
+            Created by Thomas Ablett for NCEA students
+        </p>
+        <p style="color: white;">
+            Font by <a href="https://fonts.googleapis.com">Google Fonts</a>
+        </p>
+        <p style="color: white;">
+            Icons by <a href="https://icons8.com/">Icons8</a>
+        </p>
+    </footer>
 
 </body>
 </html>

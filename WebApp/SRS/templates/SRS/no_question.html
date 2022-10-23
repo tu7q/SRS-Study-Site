@@ -1,5 +1,9 @@
 {% extends 'SRS/base.html' %}
 
+{% block head %}
+    <title>AS{{ standard }}</title>
+{% endblock %}
+
 {% block content %}
 <div style="text-align:center; width: 100%;">
     <p>There are no currently available questions. The next question is in {{ next_question.forbidden_until|timeuntil }}.</p>

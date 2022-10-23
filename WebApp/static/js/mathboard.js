@@ -8,6 +8,7 @@ field.setOptions({
 const add_button = mf.getElementsByClassName('add')[0]; 
 const delete_button = document.createElement("button");
 delete_button.innerHTML = "-";
+delete_button.title = "Remove Line";
 delete_button.classList.add("delete");
 delete_button.style = "display: inline-block; float: right;";
 

@@ -9,6 +9,7 @@ urlpatterns = [
         name="Index"
         # name="AssesmentViews",
     ),  # view all assesments
+    path("FAQ/", views.FAQ.as_view(), name="FAQ"),
     path("assesment/<int:standard>/", views.QuestionView.as_view(), name="QuestionView"),  # view/answer questions
     path("answer/<int:standard>/", views.AnswerView.as_view(), name="AnswerView"),  # view/answer questions
     path("mark/<int:standard>/<int:score>", views.MarkView.as_view(), name="MarkView"),  # view/answer questions
