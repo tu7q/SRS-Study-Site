@@ -23,19 +23,19 @@
 <div class="topbar">
     {# Note: slice:":10" is a redundancy to ensure multiple things are not evaluated all at once #}
     {% for assesment in recent_assesments|slice:":10" %}
-        <div>
-            <article class="w3-container w3-white w3-hover-grey linked-div margin-horizontal">
-                <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" class="linked-div-a"></a>
-                <p><b>{{ assesment.NAME }}</b></p>
-                <p>standard-{{ assesment.STANDARD }}</p>
-                <p>level-{{ assesment.LEVEL }}</p>
-            </article>
-        </div>
+        <article class="w3-container w3-white w3-hover-grey linked-div margin-horizontal">
+            <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" class="linked-div-a"></a>
+            <h5 style="text-decoration: underline;">{{ assesment.NAME }}</h5>
+            <p>standard-{{ assesment.STANDARD }}</p>
+            <p>level-{{ assesment.LEVEL }}</p>
+        </article>
     {% endfor %}
 </div>
 
 <span class="centered margin-vertical">Search Results</span>
 
-<!-- <div hx-get="{# request.full_path #}?page=1" hx-trigger="load" id="assesment-target" hx-swap="afterend"></div> -->
-<div hx-get="{{ request.path }}?page=1&search={{ params.search|urlencode }}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div class="topbar">
+    <!-- <div hx-get="{# request.full_path #}?page=1" hx-trigger="load" id="assesment-target" hx-swap="afterend"></div> -->
+    <div hx-get="{{ request.path }}?page=1&search={{ params.search|urlencode }}" hx-trigger="load" hx-swap="outerHTML"></div>
+</div>
 {% endblock %}

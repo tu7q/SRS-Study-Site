@@ -4,8 +4,9 @@ span.centered {
 }
 
 .topbar {
-    display: flex;
-    direction: row;
+    display: grid;
+    grid-auto-rows: 1fr;
+    grid-template-columns: repeat(3, 1fr);
     width: 100%;
     /* margin-left: 16px;
     margin-right: 16px; */
@@ -17,8 +18,8 @@ span.centered {
 .topbar > * {
     text-align: center;
     align-content: center;
-    width: 33.3333%;
     min-width: 200px;
+    width: 90%;
 }
 
 p, a {

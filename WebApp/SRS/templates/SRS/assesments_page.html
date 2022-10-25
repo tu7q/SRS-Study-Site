@@ -1,18 +1,14 @@
 {% load SRS_tags %}
 
 {% for chunk in assesments|chunks:3 %}
-<div class=""w3-row-padding>
 {% for assesment in chunk %}
-    <article class="w3-third w3-container w3-margin-bottom">
-        <div class="w3-container w3-white w3-hover-grey linked-div center-text">
-            <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" class="linked-div-a"></a>
-            <p><b>{{ assesment.NAME }}</b></p>
-            <p>standard-{{ assesment.STANDARD }}</p>
-            <p>level-{{ assesment.LEVEL }}</p>
-        </div>
-    </article>
+<article class="w3-container w3-white w3-hover-grey linked-div margin-horizontal margin-vertical">
+    <a href="{% url 'QuestionView' standard=assesment.STANDARD %}" class="linked-div-a"></a>
+    <h5 style="text-decoration: underline;">{{ assesment.NAME }}</h5>
+    <p>standard-{{ assesment.STANDARD }}</p>
+    <p>level-{{ assesment.LEVEL }}</p>
+</article>
 {% endfor %}
-</div>
 {% endfor %}
 
 {% if assesments.has_next %}
