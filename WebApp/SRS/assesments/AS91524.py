@@ -149,8 +149,8 @@ class Q_4(QAA):
         v = math.sqrt(g * radius)
 
         context["g"] = g
-        context["M"] = M
-        context["r"] = radius
+        context["M"] = round(M, 1)
+        context["r"] = round(radius, 1)
         context["v"] = round(v, 1)
 
         return context

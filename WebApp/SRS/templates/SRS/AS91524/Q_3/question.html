@@ -1,9 +1,11 @@
+{% load SRS_tags %}
+
 <div style="text-align: center; width: 70%; margin-left: auto; margin-right: auto;">
     <h3>AS91524 - Demonstrate understanding of mechanical systems</h3>
     <p>
         A space rock travelling a {{ v }} metres per second orbits a planet in a circular path. The period of the 
-        rock's orbit is {{ T|stringformat:".2e" }} seconds. Calculate the mass of the planet.  
-        Note: G is {{G|stringformat:".2e"}}
+        rock's orbit is $${{ T|latexnotation:2 }}$$ seconds. Calculate the mass of the planet.  
+        Note: G is $${{ G|latexnotation:2 }}$$
     </p>
 </div>
 

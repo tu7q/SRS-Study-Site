@@ -1,15 +1,12 @@
 const mf = document.getElementById("mathfield-edit");
 const field = mf.getElementsByTagName('math-field')[0];
-field.setOptions({
-    virtualKeyboardMode: "manual",
-    virtualKeyboardLayout: 'dvorak',
-    virtualKeyboardContainer: document.getElementById("main")
-});
 const add_button = mf.getElementsByClassName('add')[0]; 
 const delete_button = document.createElement("button");
 delete_button.innerHTML = "-";
 delete_button.title = "Remove Line";
 delete_button.classList.add("delete");
+
+add_button.addEventListener('click', add_line);
 
 function line_after(node) {
     let next = mf.cloneNode(true);
@@ -26,4 +23,15 @@ function delete_line(e) {
     this.parentNode.parentNode.remove();
 }
 
-add_button.addEventListener('click', add_line);
+window.addEventListener("DOMContentLoaded", () => {
+    MathLive.renderMathInDocument();
+    field.setOptions({
+        virtualKeyboardMode: "manual",
+        virtualKeyboardLayout: 'dvorak',
+        virtualKeyboardContainer: document.getElementById("main")
+    });
+});
+
+htmx.onLoad(function(content) {
+    MathLive.renderMathInDocument();
+})
