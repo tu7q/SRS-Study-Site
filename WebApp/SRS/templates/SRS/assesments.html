@@ -12,7 +12,7 @@
 <!-- Search -->
 <form action="{{ request.path }}" method="GET">
     <input type="text" id="search" name="search" placeholder="Search.."
-        minlength="1" maxlength="30" size="10" {% if request.GET.search %}value="{{ request.GET.search }}"{% endif %}>
+        minlength="1" maxlength="30" size="10" {% if params.search %}value="{{ params.search }}"{% endif %}>
     <button type="submit"><span class="icon" id="search-icon"></span></button> 
 </form>  
 
